@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">さかテル</string>
+    <string name="backbutton_text">戻る</string>
+    <string name="cocktailListButton_text">カクテル一覧</string>
+    <string name="adMob_text">広告</string>
+    <string name="menuButton_text">メニュー</string>
+    <string name="materialToCocktailButton_text">材料からカクテルを探す</string>
+    <string name="materialListButton_text">素材一覧</string>
+    <string name="materialToCocktailDescription_text">持っているベースから作れるカクテルの一覧</string>
+    <string name="materialRegistButton_text">材料登録</string>
+    <string name="save_text">保存</string>
+    <string name="ProductName_text">製品名</string>
+    <string name="recipe_text">レシピ</string>
+    <string name="detail_text">詳細</string>
+    <string name="photo_URL">img/</string>
+    <string name="server_URL">http://www.homes.ecweb.jp/A1601/</string>
+    <string name="Have_text">ある</string>
+    <string name="DoNotHave_text">ない</string>
+    <string name="NoImage_URL">noimage.jpg</string>
+    <string name="NoThumbnail_URL">nothumbnail.jpg</string>
+    <string name="TAG_ProductID_Key">1</string>
+    <string name="TAG_MaterialID_Key">2</string>
+    <string name="ERR_VolleyTitle_text">通信エラー</string>
+    <string name="ERR_VolleyMessage_text">サーバーとの通信に失敗しました。\n通信状態を確認してください。</string>
+</resources>
