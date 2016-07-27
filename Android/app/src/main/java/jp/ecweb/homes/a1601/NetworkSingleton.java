@@ -13,21 +13,34 @@ import com.android.volley.toolbox.Volley;
  * Created by Takashi Kakinuma on 2016/07/15.
  */
 public class NetworkSingleton {
-	private static NetworkSingleton ourInstance;
-	private RequestQueue mRequestQueue;
-	private static Context mContext;
-	private ImageLoader mImageLoader;
 
+	// メンバ変数
+	private static NetworkSingleton ourInstance;			// インスタンス
+	private RequestQueue mRequestQueue;					// リクエストキュー
+	private static Context mContext;						// コンテキスト
+	private ImageLoader mImageLoader;					// イメージローダー
+
+	// 固定値
+	private static final Object TAG_REQUEST_QUEUE =	// キャンセル用タグ
+			new Object();
+
+	// インスタンスの取得・生成
 	public static synchronized NetworkSingleton getInstance(Context context) {
+		// インスタンスが生成されていない場合は作成する
 		if (ourInstance == null) {
 			ourInstance = new NetworkSingleton(context);
 		}
+
 		return ourInstance;
 	}
 
+	// コンストラクタ
 	private NetworkSingleton(Context context) {
+		// コンテキスト・リクエストキューをメンバ変数に格納
 		mContext = context;
 		mRequestQueue = getRequestQueue();
+
+		// イメージローダーのインスタンスをメンバ変数に格納
 		mImageLoader = new ImageLoader(mRequestQueue,
 				new ImageLoader.ImageCache() {
 					private final LruCache<String, Bitmap> cache =
@@ -45,19 +58,30 @@ public class NetworkSingleton {
 				});
 	}
 
+	// リクエストキューの取得・生成
 	public RequestQueue getRequestQueue() {
+		// リクエストキューが生成されていない場合は作成する
 		if (mRequestQueue == null) {
 			mRequestQueue =
 					Volley.newRequestQueue(mContext.getApplicationContext());
 		}
+
 		return mRequestQueue;
 	}
 
+	// リクエストキューへのリクエスト追加
 	public <T> void addToRequestQueue(Request<T> req) {
+		req.setTag(TAG_REQUEST_QUEUE);
 		getRequestQueue().add(req);
 	}
 
+	// イメージローダーの取得
 	public ImageLoader getImageLoader() {
 		return mImageLoader;
+	}
+
+	// リクエストの停止
+	public void cancelAll() {
+		mRequestQueue.cancelAll(TAG_REQUEST_QUEUE);
 	}
 }

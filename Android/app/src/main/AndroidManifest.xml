@@ -10,25 +10,19 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="jp.ecweb.homes.a1601.MainActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="jp.ecweb.homes.a1601.A0201_ProductToCocktailActivity"/>
-        <activity android:name="jp.ecweb.homes.a1601.A0202_ProductListActivity"/>
-        <activity android:name=".CocktailListItemActivity">
-        </activity>
-        <activity android:name="jp.ecweb.homes.a1601.A0301_CocktailListActivity">
-        </activity>
-        <activity android:name="jp.ecweb.homes.a1601.A0302_CocktailActivity">
-        </activity>
-        <activity android:name=".RecipeListItemActivity">
-        </activity>
-        <activity android:name=".ProductListItemActivity">
-        </activity>
+        <activity android:name=".A0201_ProductToCocktailActivity"/>
+        <activity android:name=".A0202_ProductListActivity"/>
+        <activity android:name=".A0301_CocktailListActivity"/>
+        <activity android:name=".A0302_CocktailActivity"/>
+        <activity android:name=".CocktailListItemActivity"/>
+        <activity android:name=".RecipeListItemActivity"/>
+        <activity android:name=".ProductListItemActivity"/>
     </application>
 
 </manifest>

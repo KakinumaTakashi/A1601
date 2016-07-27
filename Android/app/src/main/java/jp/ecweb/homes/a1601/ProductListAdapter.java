@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,13 +23,14 @@ import jp.ecweb.homes.a1601.Cocktail.Product;
  */
 public class ProductListAdapter extends ArrayAdapter<Product> {
 
+	// メンバ変数
 	private LayoutInflater inflater;
 	private List<Product> items;
 	private int resourceId;
 
-	public MySQLiteOpenHelper mySQLHelper;
-	public SQLiteDatabase database;
+	public MySQLiteOpenHelper mSQLiteHelper;
 
+	// コンストラクタ
 	public ProductListAdapter(Context context, int resource, List<Product> objects) {
 		super(context, resource, objects);
 
@@ -39,17 +39,14 @@ public class ProductListAdapter extends ArrayAdapter<Product> {
 		this.items = objects;
 		this.resourceId = resource;
 
+		mSQLiteHelper = new MySQLiteOpenHelper(context);
 	}
 
-	public void UpdateItemList(List<Product> objects) {
-		this.items = objects;
-	}
-
+	// アイテム描画
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view;
-		Log.d("ProductListAdapter",
-				"Start getView. position is " + String.valueOf(position));
+
 		if (convertView == null) {
 			view = this.inflater.inflate(this.resourceId, null);
 		} else {
@@ -58,58 +55,63 @@ public class ProductListAdapter extends ArrayAdapter<Product> {
 
 		Product item = this.items.get(position);
 
-		ImageLoader imageLoader = NetworkSingleton.getInstance(this.getContext()).getImageLoader();
+		// サムネイル
+		ImageLoader imageLoader = NetworkSingleton.getInstance(parent.getContext()).getImageLoader();
 		NetworkImageView imageView = (NetworkImageView) view.findViewById(R.id.ProductImageView);
 		imageView.setImageUrl(item.getThumbnailURL(), imageLoader);
 
+		// 製品名
 		TextView productNameView = (TextView) view.findViewById(R.id.ProductNameView);
 		productNameView.setText(item.getName());
 
+		// 持っているボタン
 		ToggleButton productHavingButton =
 				(ToggleButton) view.findViewById(R.id.PuductHavingButton);
 
-		mySQLHelper = new MySQLiteOpenHelper(this.getContext());
-		database = mySQLHelper.getWritableDatabase();
+		// 持っているボタンの初期値を所持製品DBから取得
+		SQLiteDatabase database = mSQLiteHelper.getWritableDatabase();
 
+		// 製品IDをキーにDBを検索
 		String productID = item.getId();
 		String sql =
 				"SELECT ProductID,MaterialID FROM HavingProduct WHERE ProductID=" +
 				"\"" + productID + "\"";
-		Log.d("ProductListAdapter", sql);
 		Cursor cursor= database.rawQuery(sql, null);
+		// 製品IDがDBに登録されていたらボタンの初期値をON
 		if (cursor.moveToFirst()) {
-			Log.d("ProductListAdapter", cursor.getString(cursor.getColumnIndex("ProductID")));
-			Log.d("ProductListAdapter", "Check Set" + productID);
 			productHavingButton.setChecked(true);
 		} else {
-			Log.d("ProductListAdapter", "Check Unset" + productID);
 			productHavingButton.setChecked(false);
 		}
 
+		database.close();
+
+		// 持っているボタンに製品ID・素材IDをタグ付け
 		productHavingButton.setTag(R.string.TAG_ProductID_Key, productID);
 		productHavingButton.setTag(R.string.TAG_MaterialID_Key, item.getMaterialID());
 
+		// 持っているボタンタップ時のリスナーを登録
 		productHavingButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				ToggleButton btn = (ToggleButton) view;
-				if (btn.isChecked()) {
-					Log.d("ProductListAdapter",
-							"ProfuctID = " +
-							btn.getTag(R.string.TAG_ProductID_Key) + " OnClick! -> ON");
 
+				SQLiteDatabase database = mSQLiteHelper.getWritableDatabase();
+
+				if (btn.isChecked()) {
+					// ボタンがONになった場合 所持製品DBに製品ID・素材IDを登録
 					ContentValues values = new ContentValues();
 					values.put("ProductID", (String) btn.getTag(R.string.TAG_ProductID_Key));
 					values.put("MaterialID", (String) btn.getTag(R.string.TAG_MaterialID_Key));
+
 					database.insert("HavingProduct", null, values);
 				} else {
-					Log.d("ProductListAdapter",
-					"ProfuctID = " +
-							btn.getTag(R.string.TAG_ProductID_Key) + " OnClick! -> OFF");
-
+					// ボタンがOFFになった場合 所持製品DBから製品ID・素材IDを削除
 					database.delete("HavingProduct", "ProductID=?",
 						new String[]{(String) btn.getTag(R.string.TAG_ProductID_Key)});
 				}
+
+				database.close();
 			}
 		});
 

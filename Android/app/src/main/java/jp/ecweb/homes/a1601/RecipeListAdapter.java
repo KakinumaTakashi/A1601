@@ -1,7 +1,6 @@
 package jp.ecweb.homes.a1601;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,10 +16,12 @@ import jp.ecweb.homes.a1601.Cocktail.Recipe;
  */
 public class RecipeListAdapter extends ArrayAdapter<Recipe> {
 
+	// メンバ変数
 	private LayoutInflater inflater;
 	private List<Recipe> items;
 	private int resourceId;
 
+	// コンストラクタ
 	public RecipeListAdapter(Context context, int resource, List<Recipe> objects) {
 		super(context, resource, objects);
 
@@ -30,6 +31,7 @@ public class RecipeListAdapter extends ArrayAdapter<Recipe> {
 		this.resourceId = resource;
 	}
 
+	// アイテム描画
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view;
@@ -39,15 +41,22 @@ public class RecipeListAdapter extends ArrayAdapter<Recipe> {
 		} else {
 			view = convertView;
 		}
-Log.d("RecipeListAdapter", "getView start.");
+
 		Recipe item = this.items.get(position);
 
+		// 素材名
 		TextView matelialNameView = (TextView) view.findViewById(R.id.MatelialNameView);
 		matelialNameView.setText(item.getMatelialName());
 
+		// 分量(0の場合は空欄)
 		TextView quantityView = (TextView) view.findViewById(R.id.QuantityView);
-		quantityView.setText(String.valueOf(item.getQuantity()));
+		if (item.getQuantity() == 0) {
+			quantityView.setText("");
+		} else {
+			quantityView.setText(String.valueOf(item.getQuantity()));
+		}
 
+		// 単位
 		TextView unitView = (TextView) view.findViewById(R.id.UnitView);
 		unitView.setText(item.getUnit());
 

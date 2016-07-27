@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -32,15 +34,19 @@ public class A0201_ProductToCocktailActivity extends AppCompatActivity {
 	private final String LOG_TAG = "A1601";
 	private final String LOG_CLASSNAME = this.getClass().getSimpleName() + " : ";
 
-	private ListView mListView;
-	private CocktailListAdapter mListViewAdapter;
-	private List<Cocktail> mCocktailList = new ArrayList<Cocktail>();
+	// メンバ変数
+	private ListView mListView;										// ListView格納用
+	private CocktailListAdapter mListViewAdapter;					// アダプター格納用
+	private List<Cocktail> mCocktailList = new ArrayList<Cocktail>();		// リスト表示内容
 
+/*--------------------------------------------------------------------------------------------------
+	Activityイベント処理
+--------------------------------------------------------------------------------------------------*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-		Log.d(LOG_TAG, LOG_CLASSNAME + "Start onCreate");
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onCreate start");
 
 		// 画面を縦方向に固定
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -61,9 +67,11 @@ public class A0201_ProductToCocktailActivity extends AppCompatActivity {
 						// タップされたアイテムのカクテルIDを取得
 						Cocktail cocktail =
 								(Cocktail) parent.getItemAtPosition(position);
-						Log.d(LOG_TAG, LOG_CLASSNAME + "Select Cocktail" +
-								" ID : " + cocktail.getId() +
-								" Name : " + cocktail.getName());
+
+						Log.d(LOG_TAG, LOG_CLASSNAME + "Select Cocktail=" +
+								"ID:" + cocktail.getId() +
+								"/Name:" + cocktail.getName()
+						);
 
 						// 詳細画面に遷移(タップされたカクテルIDを引き渡す)
 						Intent intent = new Intent(
@@ -75,15 +83,15 @@ public class A0201_ProductToCocktailActivity extends AppCompatActivity {
 				}
 		);
 
-		Log.d(LOG_TAG, LOG_CLASSNAME + "End onCreate");
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onCreate end");
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		Log.d(LOG_TAG, LOG_CLASSNAME + "Start onStart");
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onStart start");
 
-// 所持商品DBから商品リストを取得
+		// 所持商品DB(Local SQLite)から商品リストを取得
 		MySQLiteOpenHelper mySQLHelper = new MySQLiteOpenHelper(this);
 		SQLiteDatabase database = mySQLHelper.getWritableDatabase();
 
@@ -101,13 +109,15 @@ public class A0201_ProductToCocktailActivity extends AppCompatActivity {
 			}
 		}
 		database.close();
+
 		Log.d(LOG_TAG, LOG_CLASSNAME + "SQLite検索結果=" +
 				stringBuilder.toString());
 
-// サーバーから商品をレシピで使用しているカクテルリストを取得
+		// サーバーから商品をレシピで使用しているカクテルリストを取得
 		// サーバーのカクテルリスト取得URL
 		String url = getString(R.string.server_URL) + "getProductToCocktailList.php" +
 				"?id=" + stringBuilder.toString();
+
 		Log.d(LOG_TAG, LOG_CLASSNAME + "WEB API URL=" + url);
 
 		// カクテルリストの受信処理(JSONをListViewに表示)
@@ -149,37 +159,8 @@ public class A0201_ProductToCocktailActivity extends AppCompatActivity {
 						} catch (JSONException e) {
 							e.printStackTrace();
 						}
+						// アダプタのリストを更新
 						mListViewAdapter.UpdateItemList(mCocktailList);
-/*
-						// ListViewのアダプターを登録
-						CocktailListAdapter adapter = new CocktailListAdapter(getBaseContext(),
-								R.layout.activity_cocktail_list_item, mCocktailList);
-						mListView = (ListView) findViewById(R.id.mListView);
-						mListView.setAdapter(adapter);
-
-						// アイテムタップ時のリスナーを登録
-						mListView.setOnItemClickListener(
-								new AdapterView.OnItemClickListener() {
-									@Override
-									public void onItemClick(AdapterView<?> parent, View view,
-															int position, long id) {
-										// タップされたアイテムのカクテルIDを取得
-										Cocktail cocktail =
-												(Cocktail) parent.getItemAtPosition(position);
-										Log.d(LOG_TAG, LOG_CLASSNAME + "Select Cocktail" +
-												" ID : " + cocktail.getId() +
-												" Name : " + cocktail.getName());
-
-										// 詳細画面に遷移(タップされたカクテルIDを引き渡す)
-										Intent intent = new Intent(
-												A0201_ProductToCocktailActivity.this,
-												A0302_CocktailActivity.class);
-										intent.putExtra("ID", cocktail.getId());
-										startActivity(intent);
-									}
-								}
-						);
-*/
 					}
 				},
 				new Response.ErrorListener() {
@@ -203,47 +184,79 @@ public class A0201_ProductToCocktailActivity extends AppCompatActivity {
 		);
 
 		// カクテルリスト取得のリクエストを送信
-		NetworkSingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);
+		NetworkSingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonArrayRequest);
 
-		Log.d(LOG_TAG, LOG_CLASSNAME + "End onStart");
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onStart end");
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Log.d(LOG_TAG, LOG_CLASSNAME + "Start onResume");
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onResume start");
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		Log.d(LOG_TAG, LOG_CLASSNAME + "Start onPause");
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onPause start");
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		Log.d(LOG_TAG, LOG_CLASSNAME + "Start onStop");
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onStop start");
+
+		// サーバーへのリクエストをストップ
+		NetworkSingleton.getInstance(getApplicationContext()).cancelAll();
 	}
 
 	@Override
 	protected void onRestart() {
 		super.onRestart();
-		Log.d(LOG_TAG, LOG_CLASSNAME + "Start onRestart");
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onRestart start");
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		Log.d(LOG_TAG, LOG_CLASSNAME + "Start onDestroy");
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onDestroy start");
 	}
 
-	public void onMaterialListButton(View view) {
-        Intent intent = new Intent(this, A0202_ProductListActivity.class);
-        startActivity(intent);
-    }
+/*--------------------------------------------------------------------------------------------------
+	メニューイベント処理
+--------------------------------------------------------------------------------------------------*/
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
 
-    public void onBackButtonTapped(View view) {
-        finish();
-    }
+		// リソースの登録
+		getMenuInflater().inflate(R.menu.menu_a0201__product_to_cocktail, menu);
+
+		// タップリスナーの登録
+		//材料一覧
+		menu.findItem(R.id.menu_productlist).setOnMenuItemClickListener(
+				new MenuItem.OnMenuItemClickListener() {
+					@Override
+					public boolean onMenuItemClick(MenuItem menuItem) {
+						// 材料一覧画面に遷移
+						Intent intent = new Intent(getApplicationContext(),
+								A0202_ProductListActivity.class);
+						startActivity(intent);
+						return true;
+					}
+				}
+		);
+		// 戻る
+		menu.findItem(R.id.menu_back).setOnMenuItemClickListener(
+				new MenuItem.OnMenuItemClickListener() {
+					@Override
+					public boolean onMenuItemClick(MenuItem menuItem) {
+						finish();
+						return true;
+					}
+				}
+		);
+
+		return true;
+	}
 }

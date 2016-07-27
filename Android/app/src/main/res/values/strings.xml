@@ -1,13 +1,13 @@
 <resources>
     <string name="app_name">さかテル</string>
-    <string name="backbutton_text">戻る</string>
-    <string name="cocktailListButton_text">カクテル一覧</string>
+    <string name="back_text">戻る</string>
+    <string name="cocktailList_text">カクテル一覧</string>
     <string name="adMob_text">広告</string>
-    <string name="menuButton_text">メニュー</string>
-    <string name="materialToCocktailButton_text">材料からカクテルを探す</string>
-    <string name="materialListButton_text">素材一覧</string>
-    <string name="materialToCocktailDescription_text">持っているベースから作れるカクテルの一覧</string>
-    <string name="materialRegistButton_text">材料登録</string>
+    <string name="menu_text">メニュー</string>
+    <string name="productToCocktail_text">材料からカクテルを探す</string>
+    <string name="productList_text">材料一覧</string>
+    <string name="productToCocktailDescription_text">持っている材料から作れるカクテルの一覧</string>
+    <string name="productRegist_text">材料登録</string>
     <string name="save_text">保存</string>
     <string name="ProductName_text">製品名</string>
     <string name="recipe_text">レシピ</string>
@@ -22,4 +22,5 @@
     <string name="TAG_MaterialID_Key">2</string>
     <string name="ERR_VolleyTitle_text">通信エラー</string>
     <string name="ERR_VolleyMessage_text">サーバーとの通信に失敗しました。\n通信状態を確認してください。</string>
+    <string name="logo_text">Logo</string>
 </resources>

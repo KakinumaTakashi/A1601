@@ -1,10 +1,13 @@
 package jp.ecweb.homes.a1601;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -28,28 +31,40 @@ import jp.ecweb.homes.a1601.Cocktail.Recipe;
 
 public class A0302_CocktailActivity extends AppCompatActivity {
 
-	private TextView cocktailNameView;
-	private NetworkImageView cocktailImageView;
-	private ListView cocktailRecipeView;
-	private TextView cocktailDetailView;
+	// ログ出力
+	private final String LOG_TAG = "A1601";
+	private final String LOG_CLASSNAME = this.getClass().getSimpleName() + " : ";
 
-	private Cocktail cocktail = new Cocktail();
-	private List<Recipe> recipeList = new ArrayList<Recipe>();
+	// メンバ変数
+	private TextView mCocktailNameView;
+	private NetworkImageView mCocktailImageView;
+	private ListView mCocktailRecipeView;									// ListView格納用
 
+	private Cocktail mCocktail = new Cocktail();
+	private List<Recipe> mRecipeList = new ArrayList<Recipe>();					// リスト表示内容
+
+/*--------------------------------------------------------------------------------------------------
+	Activityイベント処理
+--------------------------------------------------------------------------------------------------*/
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onCreate start");
+
 		// 画面を縦方向に固定
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setContentView(R.layout.activity_a0302__cocktail);
 
+		// インテントからカクテルIDを取得
 		Intent intent = getIntent();
 		String selectedCocktailID = intent.getStringExtra("ID");
 
-// カクテル情報の受信処理
 		// サーバーからカクテル情報を取得
 		String url = getString(R.string.server_URL) + "getCocktail.php" +
 				"?id=" + selectedCocktailID;
+
+		Log.d(LOG_TAG, LOG_CLASSNAME + "WEB API URL=" + url);
 
 		JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
 				Request.Method.GET,
@@ -58,56 +73,74 @@ public class A0302_CocktailActivity extends AppCompatActivity {
 				new Response.Listener<JSONObject>() {
 					@Override
 					public void onResponse(JSONObject response) {
-//						Cocktail cocktail = new Cocktail();
-
 						try {
-							cocktail.setId(response.getString("ID"));
-							cocktail.setName(response.getString("Name"));
-							cocktail.setPhotoUrl(getString(R.string.server_URL) +
+							Log.d(LOG_TAG, LOG_CLASSNAME +
+									"Response=" + response.toString()
+							);
+
+							mCocktail.setId(response.getString("ID"));
+							mCocktail.setName(response.getString("Name"));
+							String PhotoURL = response.getString("PhotoURL");
+							if (PhotoURL.equals("")) {
+								PhotoURL = getString(R.string.NoImage_URL);
+							}
+							mCocktail.setPhotoUrl(
+									getString(R.string.server_URL) +
 									getString(R.string.photo_URL) +
-									response.getString("PhotoURL"));
-							cocktail.setThumbnailURL(getString(R.string.server_URL) +
-									getString(R.string.photo_URL) +
-									response.getString("ThumbnailURL"));
-							cocktail.setDetail(response.getString("Detail"));
-//							cocktail.setRecipeId(response.getString("RecipeID"));
+									PhotoURL
+							);
+							String ThumbnailURL = response.getString("ThumbnailURL");
+							if (ThumbnailURL.equals("")) {
+								ThumbnailURL = getString(R.string.NoThumbnail_URL);
+							}
+							mCocktail.setThumbnailURL(
+									getString(R.string.server_URL) +
+											getString(R.string.photo_URL) +
+											ThumbnailURL
+							);
 						} catch (JSONException e) {
 							e.printStackTrace();
 						}
 
 						// カクテル名
-						cocktailNameView =
+						mCocktailNameView =
 								(TextView) findViewById(R.id.A0302_CocktailNameView);
-						cocktailNameView.setText(cocktail.getName());
+						mCocktailNameView.setText(mCocktail.getName());
 
 						// カクテル写真
-						cocktailImageView =
+						mCocktailImageView =
 								(NetworkImageView) findViewById(R.id.A0302_CocktailImageView);
 						ImageLoader imageLoader =
 								NetworkSingleton.getInstance(getBaseContext()).getImageLoader();
-						cocktailImageView.setImageUrl(cocktail.getPhotoUrl(), imageLoader);
-
-						// カクテル詳細
-						cocktailDetailView =
-								(TextView) findViewById(R.id.A0302_CocktailDetailView);
-						cocktailDetailView.setText(cocktail.getDetail());
+						mCocktailImageView.setImageUrl(mCocktail.getPhotoUrl(), imageLoader);
 					}
 				},
 				new Response.ErrorListener() {
 					@Override
 					public void onErrorResponse(VolleyError error) {
-						Log.d("A1601 onErrorResponse", error.toString());
+						// エラーメッセージを表示
+						AlertDialog.Builder alert =
+								new AlertDialog.Builder(A0302_CocktailActivity.this);
+						alert.setTitle(R.string.ERR_VolleyTitle_text);
+						alert.setMessage(R.string.ERR_VolleyMessage_text);
+						alert.setPositiveButton("OK", null);
+						alert.show();
+
+						Log.e(LOG_TAG, LOG_CLASSNAME +
+								"カクテル情報の取得に失敗しました。(" +
+								error.toString() + ")"
+						);
 					}
 				}
 		);
 		// カクテルリスト取得のリクエストを送信
-		NetworkSingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
+		NetworkSingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
 
-// レシピリストの受信処理
 		// サーバーからレシピリストを取得
 		url = getString(R.string.server_URL) + "getRecipe.php" +
 				"?id=" + String.valueOf(selectedCocktailID);
-		Log.d("A0302_CocktailActivity", "url = " + url);
+
+		Log.d(LOG_TAG, LOG_CLASSNAME + "WEB API URL=" + url);
 
 		JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
 				Request.Method.GET,
@@ -117,13 +150,15 @@ public class A0302_CocktailActivity extends AppCompatActivity {
 					@Override
 					public void onResponse(JSONArray response) {
 						try {
-							Log.d("A0302_CocktailActivity",
-									"JSON Request Successful num = " +
-											String.valueOf(response.length()));
-
 							// JSONをListに展開
 							for (int i = 0; i < response.length(); i++) {
 								JSONObject jsonObject = response.getJSONObject(i);
+
+								Log.d(LOG_TAG, LOG_CLASSNAME +
+										"Response[" + String.valueOf(i) + "]=" +
+										jsonObject.toString()
+								);
+
 								Recipe recipe = new Recipe();
 								recipe.setId(jsonObject.getString("ID"));
 								recipe.setCocktailID(jsonObject.getString("CocktailID"));
@@ -134,7 +169,8 @@ public class A0302_CocktailActivity extends AppCompatActivity {
 								recipe.setMatelialName(jsonObject.getString("Name"));
 								recipe.setQuantity(jsonObject.getInt("Quantity"));
 								recipe.setUnit(jsonObject.getString("Unit"));
-								recipeList.add(recipe);
+
+								mRecipeList.add(recipe);
 							}
 						} catch (JSONException e) {
 							e.printStackTrace();
@@ -142,19 +178,94 @@ public class A0302_CocktailActivity extends AppCompatActivity {
 
 						// ListViewのアダプターを登録
 						RecipeListAdapter adapter = new RecipeListAdapter(getBaseContext(),
-								R.layout.activity_recipe_list_item, recipeList);
-						cocktailRecipeView = (ListView) findViewById(R.id.RecipeListView);
-						cocktailRecipeView.setAdapter(adapter);
+								R.layout.activity_recipe_list_item, mRecipeList);
+						mCocktailRecipeView = (ListView) findViewById(R.id.RecipeListView);
+						mCocktailRecipeView.setAdapter(adapter);
 					}
 				},
 				new Response.ErrorListener() {
 					@Override
 					public void onErrorResponse(VolleyError error) {
-						Log.d("A1601 onErrorResponse", error.toString());
+						// エラーメッセージを表示
+						AlertDialog.Builder alert =
+								new AlertDialog.Builder(A0302_CocktailActivity.this);
+						alert.setTitle(R.string.ERR_VolleyTitle_text);
+						alert.setMessage(R.string.ERR_VolleyMessage_text);
+						alert.setPositiveButton("OK", null);
+						alert.show();
+
+						Log.e(LOG_TAG, LOG_CLASSNAME +
+								"レシピ情報の取得に失敗しました。(" +
+								error.toString() + ")"
+						);
 					}
 				}
 		);
 		// カクテルリスト取得のリクエストを送信
-		NetworkSingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);
+		NetworkSingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonArrayRequest);
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onStart start");
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onResume start");
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onPause start");
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onStop start");
+
+		// サーバーへのリクエストをストップ
+		NetworkSingleton.getInstance(getApplicationContext()).cancelAll();
+	}
+
+	@Override
+	protected void onRestart() {
+		super.onRestart();
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onRestart start");
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onDestroy start");
+	}
+
+/*--------------------------------------------------------------------------------------------------
+	メニューイベント処理
+--------------------------------------------------------------------------------------------------*/
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+
+		// リソースの登録
+		getMenuInflater().inflate(R.menu.menu_a0302__cocktail, menu);
+
+		// タップリスナーの登録
+		// 戻る
+		menu.findItem(R.id.menu_back).setOnMenuItemClickListener(
+				new MenuItem.OnMenuItemClickListener() {
+					@Override
+					public boolean onMenuItemClick(MenuItem menuItem) {
+						finish();
+						return true;
+					}
+				}
+		);
+
+		return true;
 	}
 }

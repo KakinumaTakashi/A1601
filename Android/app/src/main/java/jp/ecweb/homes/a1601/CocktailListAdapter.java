@@ -19,10 +19,12 @@ import jp.ecweb.homes.a1601.Cocktail.Cocktail;
  */
 public class CocktailListAdapter extends ArrayAdapter<Cocktail> {
 
+	// メンバ変数
 	private LayoutInflater inflater;
 	private List<Cocktail> items;
 	private int resourceId;
 
+	// コンストラクタ
 	public CocktailListAdapter(Context context, int resource, List<Cocktail> objects) {
 		super(context, resource, objects);
 
@@ -33,13 +35,15 @@ public class CocktailListAdapter extends ArrayAdapter<Cocktail> {
 
 	}
 
+	// リストの更新とListViewの再描画
 	public void UpdateItemList(List<Cocktail> objects) {
 		this.items = objects;
 		notifyDataSetChanged();
 	}
 
+	// アイテム描画
 	@Override
-	public View getView(int position, View convertView, ViewGroup viewGroup) {
+	public View getView(int position, View convertView, ViewGroup parent) {
 		View view;
 
 		if (convertView == null) {
@@ -50,13 +54,12 @@ public class CocktailListAdapter extends ArrayAdapter<Cocktail> {
 
 		Cocktail item = this.items.get(position);
 
-		TextView cocktailIDView = (TextView) view.findViewById(R.id.cocktailIDView);
-		cocktailIDView.setText(item.getId());
-
+		// カクテル名
 		TextView cocktailNameView = (TextView) view.findViewById(R.id.cocktailNameView);
 		cocktailNameView.setText(item.getName());
 
-		ImageLoader imageLoader = NetworkSingleton.getInstance(this.getContext()).getImageLoader();
+		// サムネイル
+		ImageLoader imageLoader = NetworkSingleton.getInstance(parent.getContext()).getImageLoader();
 		NetworkImageView imageView = (NetworkImageView) view.findViewById(R.id.cocktailImageView);
 		imageView.setImageUrl(item.getThumbnailURL(), imageLoader);
 

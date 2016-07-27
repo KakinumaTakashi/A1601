@@ -1,62 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="jp.ecweb.homes.a1601.MainActivity">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context="jp.ecweb.homes.a1601.MainActivity"
+                android:background="@android:color/white">
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/imageView"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:scaleType="center"
-        android:src="@drawable/background" />
-
-    <RelativeLayout
-        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/imageView"
-        android:layout_alignStart="@+id/imageView"
-        android:id="@+id/buttonLayout">
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/backbutton_text"
-            android:id="@+id/backButton"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:onClick="onBackButtonTapped" />
-    </RelativeLayout>
+        android:id="@+id/LogoImage"
+        android:src="@drawable/logo"
+        android:scaleType="centerInside"
+        android:contentDescription="@string/logo_text"/>
 
     <LinearLayout
-        android:orientation="vertical"
+        android:id="@+id/menuLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/buttonLayout"
-        android:layout_alignLeft="@+id/imageView"
-        android:layout_alignStart="@+id/imageView"
-        android:id="@+id/menuLayout"
-        android:gravity="center">
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_below="@+id/LogoImage"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/materialToCocktailButton_text"
             android:id="@+id/materialToCocktailButton"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_gravity="center_horizontal"
-            android:onClick="onMaterialToCocktailButtonTapped" />
+            android:onClick="onMaterialToCocktailButtonTapped"
+            android:text="@string/productToCocktail_text"
+            android:textColor="@color/Blue"
+            android:textSize="18sp"
+            android:layout_weight="1"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/cocktailListButton_text"
             android:id="@+id/cocktailListButton"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_gravity="center_horizontal"
-            android:onClick="onCocktailListButton"/>
+            android:onClick="onCocktailListButton"
+            android:text="@string/cocktailList_text"
+            android:textColor="@color/Blue"
+            android:textSize="18sp"
+            android:layout_weight="1"/>
+
     </LinearLayout>
 
 </RelativeLayout>
