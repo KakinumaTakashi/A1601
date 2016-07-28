@@ -51,7 +51,13 @@ public class A0201_ProductToCocktailActivity extends AppCompatActivity {
 		// 画面を縦方向に固定
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_a0201__product_to_cocktail);
-
+/*
+		// 広告を表示
+		MobileAds.initialize(getApplicationContext(), "ca-app-pub-2276647365248742~3207890318");
+		AdView mAdView = (AdView) findViewById(R.id.adView);
+		AdRequest adRequest = new AdRequest.Builder().build();
+		mAdView.loadAd(adRequest);
+*/
 		// ListViewのアダプターを登録
 		mListViewAdapter = new CocktailListAdapter(A0201_ProductToCocktailActivity.this,
 				R.layout.activity_cocktail_list_item, mCocktailList);

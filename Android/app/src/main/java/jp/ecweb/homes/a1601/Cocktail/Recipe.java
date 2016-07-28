@@ -7,6 +7,11 @@ import io.realm.annotations.PrimaryKey;
  */
 public class Recipe {
 
+	// ログ出力
+	private final String LOG_TAG = "A1601";
+	private final String LOG_CLASSNAME = this.getClass().getSimpleName() + " : ";
+
+	// メンバ変数
 	@PrimaryKey
 	private String id;					// レシピID
 	private String cocktailID;		// カクテルID
@@ -18,75 +23,30 @@ public class Recipe {
 	private int quantity;			// 分量
 	private String unit;				// 単位
 
-	public String getId() {
-		return id;
-	}
+	public String getId() { return id; }
+	public void setId(String id) { this.id = id; }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+	public String getCocktailID() { return cocktailID; }
+	public void setCocktailID(String cocktailID) { this.cocktailID = cocktailID;}
 
-	public String getCocktailID() {
-		return cocktailID;
-	}
+	public String getMatelialID() { return matelialID; }
+	public void setMatelialID(String matelialID) { this.matelialID = matelialID; }
 
-	public void setCocktailID(String cocktailID) {
-		this.cocktailID = cocktailID;
-	}
+	public int getQuantity() { return quantity; }
+	public void setQuantity(int quantity) { this.quantity = quantity; }
 
-	public String getMatelialID() {
-		return matelialID;
-	}
+	public String getUnit() { return unit; }
+	public void setUnit(String unit) { this.unit = unit; }
 
-	public void setMatelialID(String matelialID) {
-		this.matelialID = matelialID;
-	}
+	public String getCategory1() { return category1; }
+	public void setCategory1(String category1) { this.category1 = category1; }
 
-	public int getQuantity() {
-		return quantity;
-	}
+	public String getCategory2() { return category2; }
+	public void setCategory2(String category2) { this.category2 = category2; }
 
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
-	}
+	public String getCategory3() { return category3; }
+	public void setCategory3(String category3) { this.category3 = category3; }
 
-	public String getUnit() {
-		return unit;
-	}
-
-	public void setUnit(String unit) {
-		this.unit = unit;
-	}
-
-	public String getCategory1() {
-		return category1;
-	}
-
-	public void setCategory1(String category1) {
-		this.category1 = category1;
-	}
-
-	public String getCategory2() {
-		return category2;
-	}
-
-	public void setCategory2(String category2) {
-		this.category2 = category2;
-	}
-
-	public String getCategory3() {
-		return category3;
-	}
-
-	public void setCategory3(String category3) {
-		this.category3 = category3;
-	}
-
-	public String getMatelialName() {
-		return matelialName;
-	}
-
-	public void setMatelialName(String matelialName) {
-		this.matelialName = matelialName;
-	}
+	public String getMatelialName() { return matelialName; }
+	public void setMatelialName(String matelialName) { this.matelialName = matelialName; }
 }

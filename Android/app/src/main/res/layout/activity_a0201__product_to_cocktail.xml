@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
+                xmlns:ads="http://schemas.android.com/apk/res-auto"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 tools:context=".A0201_ProductToCocktailActivity"
                 android:background="@android:color/white">
-
-    <ListView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/listView"
-        android:layout_below="@+id/textView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"/>
 
     <TextView
         android:layout_width="match_parent"
@@ -20,9 +13,14 @@
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
         android:text="@string/productToCocktailDescription_text"
         android:id="@+id/textView"
-        android:layout_alignParentTop="true"
+        android:paddingBottom="10dp"/>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/listView"
+        android:layout_below="@+id/textView"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:paddingBottom="10dp"
-        />
+        android:layout_alignParentStart="true"/>
+
 </RelativeLayout>

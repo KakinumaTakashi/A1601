@@ -4,9 +4,14 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -20,10 +25,57 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onCreate start");
+
 		// 画面を縦方向に固定
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_a0101__main);
+
+		// 広告を表示
+		MobileAds.initialize(getApplicationContext(), "ca-app-pub-2276647365248742~3207890318");
+		AdView mAdView = (AdView) findViewById(R.id.adView);
+		AdRequest adRequest = new AdRequest.Builder().build();
+		mAdView.loadAd(adRequest);
+
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onCreate end");
     }
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onStart start");
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onResume start");
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onPause start");
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onStop start");
+	}
+
+	@Override
+	protected void onRestart() {
+		super.onRestart();
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onRestart start");
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		Log.d(LOG_TAG, LOG_CLASSNAME + "onDestroy start");
+	}
 
 /*--------------------------------------------------------------------------------------------------
 	メニューイベント処理

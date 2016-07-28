@@ -25,15 +25,28 @@
             android:id="@+id/cocktailImageView"
             android:scaleType="centerCrop"/>
 
-        <TextView
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Medium Text"
-            android:id="@+id/cocktailNameView"
-            android:layout_below="@+id/linearLayout3"
-            android:gravity="center_vertical"
-            android:paddingLeft="10dp"/>
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Medium Text"
+                android:id="@+id/cocktailNameView"
+                android:layout_below="@+id/linearLayout3"
+                android:paddingLeft="10dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Small Text"
+                android:id="@+id/recipeView"
+                android:paddingLeft="10dp"/>
+        </LinearLayout>
 
     </LinearLayout>
 

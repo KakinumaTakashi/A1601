@@ -111,7 +111,7 @@ public class A0302_CocktailActivity extends AppCompatActivity {
 						mCocktailImageView =
 								(NetworkImageView) findViewById(R.id.A0302_CocktailImageView);
 						ImageLoader imageLoader =
-								NetworkSingleton.getInstance(getBaseContext()).getImageLoader();
+								NetworkSingleton.getInstance(getApplicationContext()).getImageLoader();
 						mCocktailImageView.setImageUrl(mCocktail.getPhotoUrl(), imageLoader);
 					}
 				},

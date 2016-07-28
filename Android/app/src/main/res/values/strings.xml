@@ -23,4 +23,5 @@
     <string name="ERR_VolleyTitle_text">通信エラー</string>
     <string name="ERR_VolleyMessage_text">サーバーとの通信に失敗しました。\n通信状態を確認してください。</string>
     <string name="logo_text">Logo</string>
+    <string name="banner_ad_unit_id">ca-app-pub-2276647365248742/4684623515</string>
 </resources>

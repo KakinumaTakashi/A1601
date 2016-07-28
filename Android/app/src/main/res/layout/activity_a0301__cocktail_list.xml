@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="jp.ecweb.homes.a1601.A0301_CocktailListActivity">
+    tools:context="jp.ecweb.homes.a1601.A0301_CocktailListActivity"
+    android:background="@android:color/white">
 
     <TextView
         android:layout_width="match_parent"
