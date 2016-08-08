@@ -8,7 +8,7 @@ android {
         applicationId "jp.ecweb.homes.a1601ap"
         minSdkVersion 15
         targetSdkVersion 24
-        versionCode 2
+        versionCode 4
         versionName "1.0"
     }
     buildTypes {

@@ -15,31 +15,78 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ToggleButton
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/PuductHavingButton"
-            android:focusable="false"
-            android:textOn="@string/Have_text"
-            android:textOff="@string/DoNotHave_text"
-            android:textSize="10sp"
-            android:paddingRight="10dp"
-            android:layout_gravity="center_vertical"/>
-
         <com.android.volley.toolbox.NetworkImageView
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:id="@+id/ProductImageView"
-            android:scaleType="centerCrop"/>
+            android:scaleType="centerCrop"
+            android:layout_gravity="center_vertical"/>
 
-        <TextView
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Medium Text"
-            android:id="@+id/ProductNameView"
-            android:paddingLeft="10dp"
-            android:gravity="center_vertical"/>
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="10dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Medium Text"
+                    android:id="@+id/ProductNameView"
+                    android:gravity="center_vertical"
+                    />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Small Text"
+                    android:id="@+id/MakerTextView"/>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:text="Small Text"
+                        android:id="@+id/CapacityTextView"
+                        android:layout_weight="1"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:text="Small Text"
+                        android:id="@+id/AlcoholDegreeTextView"
+                        android:layout_weight="1"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <ToggleButton
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/PuductHavingButton"
+                android:focusable="false"
+                android:textOn="@string/Have_text"
+                android:textOff="@string/DoNotHave_text"
+                android:textSize="10sp"
+                android:paddingRight="10dp"
+                android:layout_gravity="center_vertical"
+                />
+
+        </LinearLayout>
 
     </LinearLayout>
 </RelativeLayout>

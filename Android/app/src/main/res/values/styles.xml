@@ -8,4 +8,8 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="ListViewHaveItem" parent="@android:style/TextAppearance.Small">
+        <item name="android:textColor">@color/Blue</item>
+    </style>
+
 </resources>

@@ -24,4 +24,15 @@
     <string name="ERR_VolleyMessage_text">サーバーとの通信に失敗しました。\n通信状態を確認してください。</string>
     <string name="logo_text">Logo</string>
     <string name="banner_ad_unit_id">ca-app-pub-2276647365248742/4684623515</string>
+    <string name="version_text">version : 1.0</string>
+    <string name="product_text">材料</string>
+    <string name="Methods_text">製法</string>
+    <string name="Grass_text">グラス</string>
+    <string name="AlcoholDegree_text">アルコール度数</string>
+    <string name="HowTo_text">作り方</string>
+    <string name="JapaneseSyllabary_text">五十音</string>
+    <string name="Base_text">ベース</string>
+    <string name="All_text">全て</string>
+    <string name="TAG_CocktailID_Key">3</string>
+    <string name="favorite_text">お気に入り</string>
 </resources>

@@ -13,6 +13,9 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,7 +24,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.ecweb.homes.a1601.Adapter.ProductListAdapter;
 import jp.ecweb.homes.a1601.Cocktail.Product;
+import jp.ecweb.homes.a1601.Network.NetworkSingleton;
 
 public class A0202_ProductListActivity extends AppCompatActivity {
 
@@ -30,8 +35,8 @@ public class A0202_ProductListActivity extends AppCompatActivity {
     private final String LOG_CLASSNAME = this.getClass().getSimpleName() + " : ";
 
     // メンバ変数
-    private ListView mListView;                                        // ListView格納用
-    private List<Product> mProductList = new ArrayList<Product>();           // リスト表示内容
+    private ListView mListView;                                     // ListView格納用
+    private List<Product> mProductList = new ArrayList<>();         // リスト表示内容
 
 /*--------------------------------------------------------------------------------------------------
     Activityイベント処理
@@ -45,6 +50,12 @@ public class A0202_ProductListActivity extends AppCompatActivity {
         // 画面を縦方向に固定
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_a0202__product_list);
+
+	    // 広告を表示
+	    MobileAds.initialize(getApplicationContext(), "ca-app-pub-2276647365248742~3207890318");
+	    AdView mAdView = (AdView) findViewById(R.id.adView);
+	    AdRequest adRequest = new AdRequest.Builder().build();
+	    mAdView.loadAd(adRequest);
 
         // サーバーの商品リスト取得URL
         String url = getString(R.string.server_URL) + "getProductList.php";
@@ -167,9 +178,6 @@ public class A0202_ProductListActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         Log.d(LOG_TAG, LOG_CLASSNAME + "onStop start");
-
-        // サーバーへのリクエストをストップ
-        NetworkSingleton.getInstance(getApplicationContext()).cancelAll();
     }
 
     @Override

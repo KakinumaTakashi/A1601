@@ -1,23 +1,30 @@
 package jp.ecweb.homes.a1601;
 
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.NetworkImageView;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,8 +33,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.ecweb.homes.a1601.Adapter.RecipeListAdapter;
 import jp.ecweb.homes.a1601.Cocktail.Cocktail;
 import jp.ecweb.homes.a1601.Cocktail.Recipe;
+import jp.ecweb.homes.a1601.Database.MySQLiteOpenHelper;
+import jp.ecweb.homes.a1601.Network.NetworkSingleton;
 
 public class A0302_CocktailActivity extends AppCompatActivity {
 
@@ -36,12 +46,18 @@ public class A0302_CocktailActivity extends AppCompatActivity {
 	private final String LOG_CLASSNAME = this.getClass().getSimpleName() + " : ";
 
 	// メンバ変数
-	private TextView mCocktailNameView;
-	private NetworkImageView mCocktailImageView;
-	private ListView mCocktailRecipeView;									// ListView格納用
+	private RecipeListAdapter mListViewAdapter;					// アダプター格納用
+
+	private TextView mCocktailNameView;                     // カクテル名
+	private NetworkImageView mCocktailImageView;            // 写真
+	private TextView mMethodsTextView;                      // 製法
+	private TextView mGrassTextView;                        // グラス
+	private TextView mAlcoholDegreeTextView;                // アルコール度数
+	private ListView mCocktailRecipeView;					// 材料
+	private TextView mHowToTextView;                        // 作り方
 
 	private Cocktail mCocktail = new Cocktail();
-	private List<Recipe> mRecipeList = new ArrayList<Recipe>();					// リスト表示内容
+	private List<Recipe> mRecipeList = new ArrayList<>();	// リスト表示内容
 
 /*--------------------------------------------------------------------------------------------------
 	Activityイベント処理
@@ -55,6 +71,12 @@ public class A0302_CocktailActivity extends AppCompatActivity {
 		// 画面を縦方向に固定
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setContentView(R.layout.activity_a0302__cocktail);
+
+		// 広告を表示
+		MobileAds.initialize(getApplicationContext(), "ca-app-pub-2276647365248742~3207890318");
+		AdView mAdView = (AdView) findViewById(R.id.adView);
+		AdRequest adRequest = new AdRequest.Builder().build();
+		mAdView.loadAd(adRequest);
 
 		// インテントからカクテルIDを取得
 		Intent intent = getIntent();
@@ -73,14 +95,26 @@ public class A0302_CocktailActivity extends AppCompatActivity {
 				new Response.Listener<JSONObject>() {
 					@Override
 					public void onResponse(JSONObject response) {
-						try {
-							Log.d(LOG_TAG, LOG_CLASSNAME +
-									"Response=" + response.toString()
-							);
 
-							mCocktail.setId(response.getString("ID"));
-							mCocktail.setName(response.getString("Name"));
-							String PhotoURL = response.getString("PhotoURL");
+						Log.d(LOG_TAG, LOG_CLASSNAME +
+								"Response=" + response.toString()
+						);
+
+						try {
+							// ヘッダ部処理
+							String status = response.getString("status");
+
+							if (status.equals("NG")) {
+								// サーバーにてエラーが発生した場合
+								throw new JSONException(response.getString("message"));
+							}
+
+							// データ部処理
+							JSONObject data = response.getJSONObject("data");
+
+							mCocktail.setId(data.getString("ID"));
+							mCocktail.setName(data.getString("Name"));
+							String PhotoURL = data.getString("PhotoURL");
 							if (PhotoURL.equals("")) {
 								PhotoURL = getString(R.string.NoImage_URL);
 							}
@@ -89,15 +123,41 @@ public class A0302_CocktailActivity extends AppCompatActivity {
 									getString(R.string.photo_URL) +
 									PhotoURL
 							);
-							String ThumbnailURL = response.getString("ThumbnailURL");
+							String ThumbnailURL = data.getString("ThumbnailURL");
 							if (ThumbnailURL.equals("")) {
 								ThumbnailURL = getString(R.string.NoThumbnail_URL);
 							}
-							mCocktail.setThumbnailURL(
+							mCocktail.setThumbnailUrl(
 									getString(R.string.server_URL) +
 											getString(R.string.photo_URL) +
 											ThumbnailURL
 							);
+							mCocktail.setMethod(data.getString("Method"));
+							mCocktail.setGrass(data.getString("Grass"));
+							mCocktail.setAlcoholDegree((float) data.getDouble("AlcoholDegree"));
+							mCocktail.setHowTo(data.getString("HowTo"));
+
+							// レシピ部処理
+							JSONArray jsonArray = data.getJSONArray("Recipes");
+
+							for (int i = 0; i < jsonArray.length(); i++) {
+								JSONObject jsonObject = jsonArray.getJSONObject(i);
+								Recipe recipe = new Recipe();
+
+								recipe.setId(jsonObject.getString("ID"));
+								recipe.setCocktailID(jsonObject.getString("CocktailID"));
+								recipe.setMatelialID(jsonObject.getString("MatelialID"));
+								recipe.setCategory1(jsonObject.getString("Category1"));
+								recipe.setCategory2(jsonObject.getString("Category2"));
+								recipe.setCategory3(jsonObject.getString("Category3"));
+								recipe.setMatelialName(jsonObject.getString("Name"));
+								recipe.setQuantity(jsonObject.getInt("Quantity"));
+								recipe.setUnit(jsonObject.getString("Unit"));
+
+								mRecipeList.add(recipe);
+							}
+							mListViewAdapter.notifyDataSetChanged();
+
 						} catch (JSONException e) {
 							e.printStackTrace();
 						}
@@ -113,6 +173,29 @@ public class A0302_CocktailActivity extends AppCompatActivity {
 						ImageLoader imageLoader =
 								NetworkSingleton.getInstance(getApplicationContext()).getImageLoader();
 						mCocktailImageView.setImageUrl(mCocktail.getPhotoUrl(), imageLoader);
+
+						// 製法
+						mMethodsTextView =
+								(TextView) findViewById(R.id.A0302_MethodsTextView);
+						mMethodsTextView.setText(mCocktail.getMethod());
+
+						// グラス
+						mGrassTextView =
+								(TextView) findViewById(R.id.A0302_GrassTextView);
+						mGrassTextView.setText(mCocktail.getGrass());
+
+						// アルコール度数
+						mAlcoholDegreeTextView =
+								(TextView) findViewById(R.id.A0302_AlcoholDegreeTextView);
+						mAlcoholDegreeTextView.setText(
+								String.valueOf(mCocktail.getAlcoholDegree()) + " %"
+						);
+
+						// 作り方
+						mHowToTextView =
+								(TextView) findViewById(R.id.A0302_HowToTextView);
+						mHowToTextView.setText(mCocktail.getHowTo().replaceAll("\\n", "\n"));
+
 					}
 				},
 				new Response.ErrorListener() {
@@ -136,73 +219,62 @@ public class A0302_CocktailActivity extends AppCompatActivity {
 		// カクテルリスト取得のリクエストを送信
 		NetworkSingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
 
-		// サーバーからレシピリストを取得
-		url = getString(R.string.server_URL) + "getRecipe.php" +
-				"?id=" + String.valueOf(selectedCocktailID);
+		// ListViewのアダプターを登録
+		mListViewAdapter = new RecipeListAdapter(A0302_CocktailActivity.this,
+				R.layout.activity_recipe_list_item, mRecipeList);
+		mCocktailRecipeView = (ListView) findViewById(R.id.RecipeListView);
+		mCocktailRecipeView.setAdapter(mListViewAdapter);
 
-		Log.d(LOG_TAG, LOG_CLASSNAME + "WEB API URL=" + url);
 
-		JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
-				Request.Method.GET,
-				url,
-				null,
-				new Response.Listener<JSONArray>() {
-					@Override
-					public void onResponse(JSONArray response) {
-						try {
-							// JSONをListに展開
-							for (int i = 0; i < response.length(); i++) {
-								JSONObject jsonObject = response.getJSONObject(i);
+		// お気に入り
+		ToggleButton favoriteButton = (ToggleButton) findViewById(R.id.favoriteButton);
 
-								Log.d(LOG_TAG, LOG_CLASSNAME +
-										"Response[" + String.valueOf(i) + "]=" +
-										jsonObject.toString()
-								);
+		// 持っているボタンの初期値を所持製品DBから取得
+		final MySQLiteOpenHelper mSQLiteHelper = new MySQLiteOpenHelper(this);
+		SQLiteDatabase database = mSQLiteHelper.getWritableDatabase();
 
-								Recipe recipe = new Recipe();
-								recipe.setId(jsonObject.getString("ID"));
-								recipe.setCocktailID(jsonObject.getString("CocktailID"));
-								recipe.setMatelialID(jsonObject.getString("MatelialID"));
-								recipe.setCategory1(jsonObject.getString("Category1"));
-								recipe.setCategory2(jsonObject.getString("Category2"));
-								recipe.setCategory3(jsonObject.getString("Category3"));
-								recipe.setMatelialName(jsonObject.getString("Name"));
-								recipe.setQuantity(jsonObject.getInt("Quantity"));
-								recipe.setUnit(jsonObject.getString("Unit"));
+		// カクテルIDをキーにDBを検索
+		String sql =
+				"SELECT CocktailID FROM favorite WHERE CocktailID=" +
+						"\"" + selectedCocktailID + "\"";
+		Cursor cursor= database.rawQuery(sql, null);
+		// カクテルIDがDBに登録されていたらボタンの初期値をON
+		if (cursor.moveToFirst()) {
+			favoriteButton.setChecked(true);
+		} else {
+			favoriteButton.setChecked(false);
+		}
 
-								mRecipeList.add(recipe);
-							}
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
+		cursor.close();
+		database.close();
 
-						// ListViewのアダプターを登録
-						RecipeListAdapter adapter = new RecipeListAdapter(getBaseContext(),
-								R.layout.activity_recipe_list_item, mRecipeList);
-						mCocktailRecipeView = (ListView) findViewById(R.id.RecipeListView);
-						mCocktailRecipeView.setAdapter(adapter);
-					}
-				},
-				new Response.ErrorListener() {
-					@Override
-					public void onErrorResponse(VolleyError error) {
-						// エラーメッセージを表示
-						AlertDialog.Builder alert =
-								new AlertDialog.Builder(A0302_CocktailActivity.this);
-						alert.setTitle(R.string.ERR_VolleyTitle_text);
-						alert.setMessage(R.string.ERR_VolleyMessage_text);
-						alert.setPositiveButton("OK", null);
-						alert.show();
+		// お気に入りボタンにカクテルIDをタグ付け
+		favoriteButton.setTag(R.string.TAG_CocktailID_Key, selectedCocktailID);
 
-						Log.e(LOG_TAG, LOG_CLASSNAME +
-								"レシピ情報の取得に失敗しました。(" +
-								error.toString() + ")"
-						);
-					}
+		// お気に入りボタンタップ時のリスナーを登録
+		favoriteButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				ToggleButton btn = (ToggleButton) view;
+
+				SQLiteDatabase database = mSQLiteHelper.getWritableDatabase();
+
+				if (btn.isChecked()) {
+					// ボタンがONになった場合 所持製品DBに製品ID・素材IDを登録
+					ContentValues values = new ContentValues();
+					values.put("CocktailID", (String) btn.getTag(R.string.TAG_CocktailID_Key));
+
+					database.insert("favorite", null, values);
+				} else {
+					// ボタンがOFFになった場合 所持製品DBから製品ID・素材IDを削除
+					database.delete("favorite", "CocktailID=?",
+							new String[]{(String) btn.getTag(R.string.TAG_CocktailID_Key)});
 				}
-		);
-		// カクテルリスト取得のリクエストを送信
-		NetworkSingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonArrayRequest);
+
+				database.close();
+			}
+		});
+
 	}
 
 	@Override
@@ -227,9 +299,6 @@ public class A0302_CocktailActivity extends AppCompatActivity {
 	protected void onStop() {
 		super.onStop();
 		Log.d(LOG_TAG, LOG_CLASSNAME + "onStop start");
-
-		// サーバーへのリクエストをストップ
-		NetworkSingleton.getInstance(getApplicationContext()).cancelAll();
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.SpannableStringBuilder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,16 +18,25 @@ import android.widget.ListView;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import jp.ecweb.homes.a1601.Adapter.CocktailListAdapter;
 import jp.ecweb.homes.a1601.Cocktail.Cocktail;
+import jp.ecweb.homes.a1601.Database.MySQLiteOpenHelper;
+import jp.ecweb.homes.a1601.Network.NetworkSingleton;
+import jp.ecweb.homes.a1601.Network.ServerCommunication;
 
 public class A0201_ProductToCocktailActivity extends AppCompatActivity {
 
@@ -35,9 +45,10 @@ public class A0201_ProductToCocktailActivity extends AppCompatActivity {
 	private final String LOG_CLASSNAME = this.getClass().getSimpleName() + " : ";
 
 	// メンバ変数
-	private ListView mListView;										// ListView格納用
 	private CocktailListAdapter mListViewAdapter;					// アダプター格納用
-	private List<Cocktail> mCocktailList = new ArrayList<Cocktail>();		// リスト表示内容
+	private List<Cocktail> mCocktailList = new ArrayList<>();		// リスト表示内容
+	private Map<String, SpannableStringBuilder> mRecipeList = new HashMap<>();
+																	// リスト表示内容(レシピ情報)
 
 /*--------------------------------------------------------------------------------------------------
 	Activityイベント処理
@@ -51,21 +62,22 @@ public class A0201_ProductToCocktailActivity extends AppCompatActivity {
 		// 画面を縦方向に固定
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_a0201__product_to_cocktail);
-/*
-		// 広告を表示
-		MobileAds.initialize(getApplicationContext(), "ca-app-pub-2276647365248742~3207890318");
-		AdView mAdView = (AdView) findViewById(R.id.adView);
-		AdRequest adRequest = new AdRequest.Builder().build();
-		mAdView.loadAd(adRequest);
-*/
+
+	    // 広告を表示
+	    MobileAds.initialize(getApplicationContext(), "ca-app-pub-2276647365248742~3207890318");
+	    AdView mAdView = (AdView) findViewById(R.id.adView);
+	    AdRequest adRequest = new AdRequest.Builder().build();
+	    mAdView.loadAd(adRequest);
+
 		// ListViewのアダプターを登録
-		mListViewAdapter = new CocktailListAdapter(A0201_ProductToCocktailActivity.this,
+		mListViewAdapter = new CocktailListAdapter(this,
 				R.layout.activity_cocktail_list_item, mCocktailList);
-		mListView = (ListView) findViewById(R.id.listView);
-		mListView.setAdapter(mListViewAdapter);
+//	    mListViewAdapter = new CocktailListAdapter(A0201_ProductToCocktailActivity.this);
+		ListView listView = (ListView) findViewById(R.id.listView);
+		listView.setAdapter(mListViewAdapter);
 
 		// アイテムタップ時のリスナーを登録
-		mListView.setOnItemClickListener(
+		listView.setOnItemClickListener(
 				new AdapterView.OnItemClickListener() {
 					@Override
 					public void onItemClick(AdapterView<?> parent, View view,
@@ -97,100 +109,42 @@ public class A0201_ProductToCocktailActivity extends AppCompatActivity {
 		super.onStart();
 		Log.d(LOG_TAG, LOG_CLASSNAME + "onStart start");
 
-		// 所持商品DB(Local SQLite)から商品リストを取得
+		final List<String> havingProduct = new ArrayList<>();
+
+		// 所持商品DB(Local SQLite)から所持している材料IDのリストを取得
 		MySQLiteOpenHelper mySQLHelper = new MySQLiteOpenHelper(this);
 		SQLiteDatabase database = mySQLHelper.getWritableDatabase();
 
 		StringBuilder stringBuilder = new StringBuilder();
 		String sql = "SELECT DISTINCT MaterialID FROM HavingProduct";
 		Cursor cursor = database.rawQuery(sql, null);
+
 		if (cursor.moveToFirst()) {
 			for (int i = 0; i < cursor.getCount(); i++) {
+				// リクエスト用に材料IDを連結
 				String value = cursor.getString(cursor.getColumnIndex("MaterialID"));
 				if (i > 0) {
 					stringBuilder.append(",");
 				}
 				stringBuilder.append(value);
+
+				// ビュー表示用にリストを作成
+				havingProduct.add(value);
+
 				cursor.moveToNext();
 			}
 		}
+
+		cursor.close();
 		database.close();
 
 		Log.d(LOG_TAG, LOG_CLASSNAME + "SQLite検索結果=" +
 				stringBuilder.toString());
 
-		// サーバーから商品をレシピで使用しているカクテルリストを取得
-		// サーバーのカクテルリスト取得URL
-		String url = getString(R.string.server_URL) + "getProductToCocktailList.php" +
-				"?id=" + stringBuilder.toString();
-
-		Log.d(LOG_TAG, LOG_CLASSNAME + "WEB API URL=" + url);
-
-		// カクテルリストの受信処理(JSONをListViewに表示)
-		JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
-				Request.Method.GET,
-				url,
-				null,
-				new Response.Listener<JSONArray>() {
-					@Override
-					public void onResponse(JSONArray response) {
-						try {
-							// リストをクリア
-							mCocktailList.clear();
-
-							// JSONをListに展開
-							for (int i = 0; i < response.length(); i++) {
-								JSONObject jsonObject = response.getJSONObject(i);
-
-								Log.d(LOG_TAG, LOG_CLASSNAME +
-										"Response[" + String.valueOf(i) + "]=" +
-										jsonObject.toString()
-								);
-
-								Cocktail cocktail = new Cocktail();
-								cocktail.setId(jsonObject.getString("ID"));
-								cocktail.setName(jsonObject.getString("Name"));
-								String ThumbnailURL = jsonObject.getString("ThumbnailURL");
-								if (ThumbnailURL.equals("")) {
-									ThumbnailURL = getString(R.string.NoThumbnail_URL);
-								}
-								cocktail.setThumbnailURL(
-										getString(R.string.server_URL) +
-										getString(R.string.photo_URL) +
-										ThumbnailURL
-								);
-
-								mCocktailList.add(cocktail);
-							}
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
-						// アダプタのリストを更新
-						mListViewAdapter.UpdateItemList(mCocktailList);
-					}
-				},
-				new Response.ErrorListener() {
-					// Volley通信エラー処理
-					@Override
-					public void onErrorResponse(VolleyError error) {
-						// エラーメッセージを表示
-						AlertDialog.Builder alert =
-								new AlertDialog.Builder(A0201_ProductToCocktailActivity.this);
-						alert.setTitle(R.string.ERR_VolleyTitle_text);
-						alert.setMessage(R.string.ERR_VolleyMessage_text);
-						alert.setPositiveButton("OK", null);
-						alert.show();
-
-						Log.e(LOG_TAG, LOG_CLASSNAME +
-								"カクテルリストの取得に失敗しました。(" +
-								error.toString() + ")"
-						);
-					}
-				}
-		);
-
-		// カクテルリスト取得のリクエストを送信
-		NetworkSingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonArrayRequest);
+		// リスト生成
+		ServerCommunication serverCommunication = new ServerCommunication();
+		serverCommunication.getProductToCocktailList(this, mListViewAdapter,
+				mCocktailList, havingProduct);
 
 		Log.d(LOG_TAG, LOG_CLASSNAME + "onStart end");
 	}
@@ -211,9 +165,6 @@ public class A0201_ProductToCocktailActivity extends AppCompatActivity {
 	protected void onStop() {
 		super.onStop();
 		Log.d(LOG_TAG, LOG_CLASSNAME + "onStop start");
-
-		// サーバーへのリクエストをストップ
-		NetworkSingleton.getInstance(getApplicationContext()).cancelAll();
 	}
 
 	@Override

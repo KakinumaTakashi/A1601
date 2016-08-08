@@ -114,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
     // カクテル一覧
     public void onCocktailListButton(View view) {
         Intent intent = new Intent(this, A0301_CocktailListActivity.class);
-        startActivity(intent);
+		startActivity(intent);
     }
+
 }

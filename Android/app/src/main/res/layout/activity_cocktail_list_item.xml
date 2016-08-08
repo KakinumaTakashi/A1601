@@ -8,7 +8,8 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".CocktailListItemActivity">
+    tools:context=".CocktailListItemActivity"
+    android:descendantFocusability="blocksDescendants">
 
     <LinearLayout
         android:orientation="horizontal"
@@ -28,16 +29,33 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
-            <TextView
+            <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Medium Text"
-                android:id="@+id/cocktailNameView"
-                android:layout_below="@+id/linearLayout3"
-                android:paddingLeft="10dp"/>
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Medium Text"
+                    android:id="@+id/cocktailNameView"
+                    android:paddingLeft="10dp"
+                    android:textColor="@android:color/black"
+                    android:layout_weight="8"/>
+
+                <ToggleButton
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:text="New ToggleButton"
+                    android:id="@+id/favoriteButton"
+                    android:background="@drawable/custom_togglebutton"
+                    android:textOff=""
+                    android:textOn=""/>
+
+            </LinearLayout>
 
             <TextView
                 android:layout_width="match_parent"
@@ -45,7 +63,8 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="Small Text"
                 android:id="@+id/recipeView"
-                android:paddingLeft="10dp"/>
+                android:paddingLeft="10dp" />
+
         </LinearLayout>
 
     </LinearLayout>
