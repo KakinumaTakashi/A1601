@@ -2,12 +2,16 @@ package jp.ecweb.homes.a1601;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
+import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -33,12 +37,28 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_a0101__main);
 
 		// 広告を表示
-		MobileAds.initialize(getApplicationContext(), "ca-app-pub-2276647365248742~3207890318");
+	    MobileAds.initialize(this, getString(R.string.banner_ad_app_id));
 		AdView mAdView = (AdView) findViewById(R.id.adView);
 		AdRequest adRequest = new AdRequest.Builder().build();
 		mAdView.loadAd(adRequest);
 
-		Log.d(LOG_TAG, LOG_CLASSNAME + "onCreate end");
+	    // 楽天ウェブサービスクレジット
+	    WebView webView = (WebView) findViewById(R.id.RakutenCreditView);
+	    webView.loadUrl("file:///android_asset/rakutencredit.html");
+
+	    // バージョン表示
+	    try {
+		    PackageManager packageManager = this.getPackageManager();
+		    PackageInfo packageInfo = packageManager.getPackageInfo(this.getPackageName(), 0);
+
+		    TextView versionNameText = (TextView) findViewById(R.id.versionNameText);
+		    versionNameText.setText("version : " + packageInfo.versionName);
+
+	    } catch (PackageManager.NameNotFoundException e) {
+		    e.printStackTrace();
+	    }
+
+	    Log.d(LOG_TAG, LOG_CLASSNAME + "onCreate end");
     }
 
 	@Override

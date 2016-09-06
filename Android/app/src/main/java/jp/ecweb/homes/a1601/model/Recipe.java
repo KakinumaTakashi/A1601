@@ -1,18 +1,11 @@
-package jp.ecweb.homes.a1601.Cocktail;
-
-import io.realm.annotations.PrimaryKey;
+package jp.ecweb.homes.a1601.model;
 
 /**
  * Created by Takashi Kakinuma on 2016/07/14.
  */
 public class Recipe {
 
-	// ログ出力
-	private final String LOG_TAG = "A1601";
-	private final String LOG_CLASSNAME = this.getClass().getSimpleName() + " : ";
-
 	// メンバ変数
-	@PrimaryKey
 	private String id;					// レシピID
 	private String cocktailID;		// カクテルID
 	private String matelialID;		// 素材ID

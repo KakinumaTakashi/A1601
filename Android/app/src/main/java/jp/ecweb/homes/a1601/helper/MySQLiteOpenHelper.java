@@ -1,4 +1,4 @@
-package jp.ecweb.homes.a1601.Database;
+package jp.ecweb.homes.a1601.helper;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,7 +17,7 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
 	private static final int DATABASE_VERSION = 1;						// DBバージョン
 
 	// 所持製品テーブル
-	private static final String PRODUCT_TABLE_NAME = "HavingProduct";	// 所持製品テーブル名
+	public static final String PRODUCT_TABLE_NAME = "HavingProduct";	// 所持製品テーブル名
 	private static final String SQL_CREATE_PRODUCT_TABLE =		        // DB作成SQL
 			"CREATE TABLE " +
 					PRODUCT_TABLE_NAME + " (" +
@@ -28,7 +28,7 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
 			"DROP TABLE " + PRODUCT_TABLE_NAME + ";";
 
 	// お気に入りテーブル
-	private static final String FAVORITE_TABLE_NAME = "favorite";
+	public static final String FAVORITE_TABLE_NAME = "favorite";
 	private static final String SQL_CREATE_FAVORITE_TABLE =		        // DB作成SQL
 			"CREATE TABLE " +
 					FAVORITE_TABLE_NAME + " (" +

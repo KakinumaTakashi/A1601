@@ -28,10 +28,94 @@
                 android:id="@+id/textView"
                 android:paddingBottom="10dp"/>
 
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp">
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center">
+
+                    <Button
+                        style="?android:attr/buttonStyleSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="20dp"
+                        android:text="@string/All_text"
+                        android:id="@+id/AllButton"
+                        android:background="@android:color/transparent"
+                        android:textColor="@color/Blue"
+                        android:onClick="onAllButtonTapped"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center">
+
+                    <Button
+                        style="@android:style/Widget.DeviceDefault.Button.Borderless.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="20dp"
+                        android:text="@string/Maker_text"
+                        android:id="@+id/MakerButton"
+                        android:background="@android:color/transparent"
+                        android:textColor="@color/Blue"
+                        android:onClick="onMakerButtonTapped"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center">
+
+                    <Button
+                        style="@android:style/Widget.DeviceDefault.Button.Borderless.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="20dp"
+                        android:text="@string/Category_text"
+                        android:id="@+id/CategoryButton"
+                        android:background="@android:color/transparent"
+                        android:textColor="@color/Blue"
+                        android:onClick="onCategoryButtonTapped"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center">
+
+                    <Button
+                        style="@android:style/Widget.DeviceDefault.Button.Borderless.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="20dp"
+                        android:text="@string/Hold_text"
+                        android:id="@+id/HoldButton"
+                        android:background="@android:color/transparent"
+                        android:textColor="@color/Blue"
+                        android:onClick="onHoldButtonTapped"/>
+                </LinearLayout>
+            </LinearLayout>
+
             <ListView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/listView"/>
+                android:id="@+id/listView"
+                android:smoothScrollbar="false"
+                android:fastScrollEnabled="true"
+                android:fastScrollAlwaysVisible="true"
+                android:focusable="false"/>
+
         </LinearLayout>
 
         <LinearLayout

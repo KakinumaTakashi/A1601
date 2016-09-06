@@ -21,6 +21,15 @@
             android:layout_weight="1"
             >
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:id="@+id/versionNameText"
+                android:text="Small Text"
+                android:gravity="bottom|right"
+                android:layout_gravity="right"/>
+
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -55,18 +64,16 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="20dp"
+            android:layout_height="40dp"
+            android:gravity="right"
             >
 
-            <TextView
+            <WebView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="@string/version_text"
-                android:id="@+id/versionText"
-                android:gravity="end"
-                android:paddingRight="10dp"
+                android:layout_height="match_parent"
+                android:id="@+id/RakutenCreditView"
                 />
+
         </LinearLayout>
 
         <LinearLayout

@@ -16,133 +16,156 @@ import com.android.volley.toolbox.NetworkImageView;
 
 import java.util.List;
 
-import jp.ecweb.homes.a1601.Cocktail.Product;
-import jp.ecweb.homes.a1601.Database.MySQLiteOpenHelper;
+import jp.ecweb.homes.a1601.dao.FavoriteDAO;
+import jp.ecweb.homes.a1601.dao.HavingProductDAO;
+import jp.ecweb.homes.a1601.model.Cocktail;
+import jp.ecweb.homes.a1601.model.HavingProduct;
+import jp.ecweb.homes.a1601.model.Product;
+import jp.ecweb.homes.a1601.helper.MySQLiteOpenHelper;
 import jp.ecweb.homes.a1601.Network.NetworkSingleton;
 import jp.ecweb.homes.a1601.R;
 
 /**
+ * 材料からカクテルを探すビュー用アダプタ
+ *
  * Created by Takashi Kakinuma on 2016/07/20.
  */
 public class ProductListAdapter extends ArrayAdapter<Product> {
 
 	// メンバ変数
-	private LayoutInflater inflater;
-	private List<Product> items;
-	private int resourceId;
+	private Context mContext;                       // 呼び出し元コンテキスト
+	private LayoutInflater mInflater;               // セルレイアウト
+	private int mResourceId;                        // セルに表示するリソースID
 
-	public MySQLiteOpenHelper mSQLiteHelper;
+	private HavingProductDAO mHavingProductDAO;     // SQLite操作用
 
-	// コンストラクタ
-	public ProductListAdapter(Context context, int resource, List<Product> objects) {
-		super(context, resource, objects);
+	public List<Product> mProductList;              // 製品一覧
 
-		this.inflater =
-				(LayoutInflater)context.getSystemService(context.LAYOUT_INFLATER_SERVICE);
-		this.items = objects;
-		this.resourceId = resource;
-
-		mSQLiteHelper = new MySQLiteOpenHelper(context);
+/*--------------------------------------------------------------------------------------------------
+	インナークラス
+--------------------------------------------------------------------------------------------------*/
+	// セルのビュー保存用ビューホルダー
+	private class ViewHolder {
+		NetworkImageView thumbnailImageView;
+		TextView categoryTextView;
+		TextView productNameView;
+		TextView makerTextView;
+		ToggleButton productHavingButton;
 	}
 
-	// アイテム描画
+/*--------------------------------------------------------------------------------------------------
+	コンストラクタ
+--------------------------------------------------------------------------------------------------*/
+	public ProductListAdapter(Context context, int resource, List<Product> productList) {
+		super(context, resource, productList);
+
+		this.mContext = context;
+		this.mInflater =
+				(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		this.mResourceId = resource;
+		this.mProductList = productList;
+
+		this.mHavingProductDAO = new HavingProductDAO(mContext);
+	}
+
+/*--------------------------------------------------------------------------------------------------
+	メソッド
+--------------------------------------------------------------------------------------------------*/
+	// セル描画
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		View view;
+		ViewHolder holder;
 
 		if (convertView == null) {
-			view = this.inflater.inflate(this.resourceId, null);
+			// セルにリソースを展開
+			convertView = mInflater.inflate(mResourceId, null);
+
+			// ビューホルダーに各ビューを保存
+			holder = new ViewHolder();
+			holder.thumbnailImageView = (NetworkImageView) convertView.findViewById(R.id.ProductImageView);
+			holder.categoryTextView = (TextView) convertView.findViewById(R.id.CategoryTextView);
+			holder.productNameView = (TextView) convertView.findViewById(R.id.ProductNameView);
+			holder.makerTextView = (TextView) convertView.findViewById(R.id.MakerTextView);
+			holder.productHavingButton = (ToggleButton) convertView.findViewById(R.id.PuductHavingButton);
+
+			// タグにビューホルダーのインスタンスを保存
+			convertView.setTag(holder);
+
 		} else {
-			view = convertView;
+			// タグからビューホルダーのインスタンスを取得
+			holder = (ViewHolder) convertView.getTag();
 		}
 
-		Product item = this.items.get(position);
+		// 各ビューにカクテル情報を設定
+		Product item = mProductList.get(position);
 
 		// サムネイル
 		ImageLoader imageLoader = NetworkSingleton.getInstance(parent.getContext()).getImageLoader();
-		NetworkImageView imageView = (NetworkImageView) view.findViewById(R.id.ProductImageView);
-		imageView.setImageUrl(item.getThumbnailURL(), imageLoader);
+		holder.thumbnailImageView.setDefaultImageResId(R.drawable.nothumbnail);
+		holder.thumbnailImageView.setErrorImageResId(R.drawable.nothumbnail);
 
-		// 製品名
-		TextView productNameView = (TextView) view.findViewById(R.id.ProductNameView);
-		productNameView.setText(item.getName());
+		if (item.getThumbnailURL().equals("")) {
+			holder.thumbnailImageView.setImageUrl(null, imageLoader);
+		} else {
+			holder.thumbnailImageView.setImageUrl(item.getThumbnailURL(), imageLoader);
+		}
 
 		// メーカー
-		TextView makerTextView = (TextView) view.findViewById(R.id.MakerTextView);
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append(item.getCategory1());
+		if (!item.getCategory2().equals("")) {
+			stringBuilder.append("/");
+			stringBuilder.append(item.getCategory2());
+		}
+		if (!item.getCategory3().equals("")) {
+			stringBuilder.append("/");
+			stringBuilder.append(item.getCategory3());
+		}
+		holder.categoryTextView.setText(stringBuilder.toString());
+
+		// 製品名
+		holder.productNameView.setText(item.getName());
+
+		// メーカー
 		if (item.getMaker().equals("")) {
-			makerTextView.setVisibility(View.GONE);
+			holder.makerTextView.setVisibility(View.GONE);
 		} else {
-			makerTextView.setText(item.getMaker());
+			holder.makerTextView.setText(item.getMaker());
 		}
-
-		// 容量
-		TextView capacityTextView = (TextView) view.findViewById(R.id.CapacityTextView);
-		if (item.getCapacity() == 0) {
-			capacityTextView.setVisibility(View.GONE);
-		} else {
-			capacityTextView.setText(String.valueOf(item.getCapacity()) + " ml");
-		}
-
-		// アルコール度数
-		TextView alcoholDegreeTextView = (TextView) view.findViewById(R.id.AlcoholDegreeTextView);
-		if (item.getAlcoholDegree() == 0) {
-			alcoholDegreeTextView.setVisibility(View.GONE);
-		} else {
-			alcoholDegreeTextView.setText(String.valueOf(item.getAlcoholDegree()) + " %");
-		}
-
-		// 持っているボタン
-		ToggleButton productHavingButton =
-				(ToggleButton) view.findViewById(R.id.PuductHavingButton);
 
 		// 持っているボタンの初期値を所持製品DBから取得
-		SQLiteDatabase database = mSQLiteHelper.getWritableDatabase();
-
 		// 製品IDをキーにDBを検索
-		String productID = item.getId();
-		String sql =
-				"SELECT ProductID,MaterialID FROM HavingProduct WHERE ProductID=" +
-				"\"" + productID + "\"";
-		Cursor cursor= database.rawQuery(sql, null);
+		final HavingProduct product = new HavingProduct();
+		product.setProductID(item.getId());
+		product.setMaterialID(item.getMaterialID());
+
 		// 製品IDがDBに登録されていたらボタンの初期値をON
-		if (cursor.moveToFirst()) {
-			productHavingButton.setChecked(true);
+		if (mHavingProductDAO.ExistProductID(product.getProductID())) {
+			holder.productHavingButton.setChecked(true);
 		} else {
-			productHavingButton.setChecked(false);
+			holder.productHavingButton.setChecked(false);
 		}
 
-		cursor.close();
-		database.close();
-
-		// 持っているボタンに製品ID・素材IDをタグ付け
-		productHavingButton.setTag(R.string.TAG_ProductID_Key, productID);
-		productHavingButton.setTag(R.string.TAG_MaterialID_Key, item.getMaterialID());
+		// 持っているボタンに製品ID・材料IDをタグ付け
+		holder.productHavingButton.setTag(R.string.TAG_ProductID_Key, product.getProductID());
+		holder.productHavingButton.setTag(R.string.TAG_MaterialID_Key, product.getMaterialID());
 
 		// 持っているボタンタップ時のリスナーを登録
-		productHavingButton.setOnClickListener(new View.OnClickListener() {
+		holder.productHavingButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				ToggleButton btn = (ToggleButton) view;
 
-				SQLiteDatabase database = mSQLiteHelper.getWritableDatabase();
-
 				if (btn.isChecked()) {
-					// ボタンがONになった場合 所持製品DBに製品ID・素材IDを登録
-					ContentValues values = new ContentValues();
-					values.put("ProductID", (String) btn.getTag(R.string.TAG_ProductID_Key));
-					values.put("MaterialID", (String) btn.getTag(R.string.TAG_MaterialID_Key));
-
-					database.insert("HavingProduct", null, values);
+					// ボタンがONになった場合 所持製品テーブルに製品ID・材料IDを登録
+					mHavingProductDAO.insertProduct(product);
 				} else {
-					// ボタンがOFFになった場合 所持製品DBから製品ID・素材IDを削除
-					database.delete("HavingProduct", "ProductID=?",
-						new String[]{(String) btn.getTag(R.string.TAG_ProductID_Key)});
+					// ボタンがOFFになった場合 所持製品テーブルから製品ID・材料IDを削除
+					mHavingProductDAO.deleteProduct(product);
 				}
-
-				database.close();
 			}
 		});
 
-		return view;
+		return convertView;
 	}
 }

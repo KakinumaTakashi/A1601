@@ -13,7 +13,7 @@ import com.android.volley.toolbox.Volley;
 import java.util.List;
 import java.util.Map;
 
-import jp.ecweb.homes.a1601.Cocktail.Cocktail;
+import jp.ecweb.homes.a1601.model.Cocktail;
 
 /**
  * Created by Takashi Kakinuma on 2016/07/15.

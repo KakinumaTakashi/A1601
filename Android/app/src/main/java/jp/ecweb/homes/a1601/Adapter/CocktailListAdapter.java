@@ -1,10 +1,6 @@
 package jp.ecweb.homes.a1601.Adapter;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,136 +13,140 @@ import com.android.volley.toolbox.NetworkImageView;
 
 import java.util.List;
 
-import jp.ecweb.homes.a1601.Cocktail.Cocktail;
-import jp.ecweb.homes.a1601.Database.MySQLiteOpenHelper;
+import jp.ecweb.homes.a1601.dao.FavoriteDAO;
+import jp.ecweb.homes.a1601.model.Cocktail;
 import jp.ecweb.homes.a1601.Network.NetworkSingleton;
 import jp.ecweb.homes.a1601.R;
+import jp.ecweb.homes.a1601.model.Favorite;
 
 /**
- * Created by Takashi Kakinuma on 2016/07/14.
- *
  * カクテル一覧用アダプタ
  *
+ * Created by Takashi Kakinuma on 2016/07/14.
  */
 
 public class CocktailListAdapter extends ArrayAdapter<Cocktail> {
 
-	// ログ出力
-	private final String LOG_TAG = "A1601";
-	private final String LOG_CLASSNAME = this.getClass().getSimpleName() + " : ";
-
 	// メンバ変数
-	private LayoutInflater mInflater;
-	private List<Cocktail> mCocktailList;
-	private int mResourceId;
+	private Context mContext;                       // 呼び出し元コンテキスト
+	private LayoutInflater mInflater;               // セルレイアウト
+	private int mResourceId;                        // セルに表示するリソースID
 
-	public MySQLiteOpenHelper mSQLiteHelper;
+	private FavoriteDAO mFavoriteDAO;               // SQLite操作用
 
-	// コンストラクタ
+	public List<Cocktail> mCocktailList;            // カクテル一覧
+
+/*--------------------------------------------------------------------------------------------------
+	インナークラス
+--------------------------------------------------------------------------------------------------*/
+	// セルのビュー保存用ビューホルダー
+	private class ViewHolder {
+		TextView cocktailNameView;
+		NetworkImageView thumbnailImageView;
+		TextView recipeView;
+		ToggleButton favoriteButton;
+	}
+
+/*--------------------------------------------------------------------------------------------------
+	コンストラクタ
+--------------------------------------------------------------------------------------------------*/
 	public CocktailListAdapter(Context context, int resource, List<Cocktail> cocktailList) {
 		super(context, resource, cocktailList);
 
+		this.mContext = context;
 		this.mInflater =
-				(LayoutInflater)context.getSystemService(context.LAYOUT_INFLATER_SERVICE);
+				(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		this.mResourceId = resource;
 		this.mCocktailList = cocktailList;
 
-		mSQLiteHelper = new MySQLiteOpenHelper(context);
+		this.mFavoriteDAO = new FavoriteDAO(mContext);
+
 	}
 
-	// リストの更新とListViewの再描画
-	public void UpdateItemList(List<Cocktail> cocktailList) {
-		this.mCocktailList = cocktailList;
-		notifyDataSetChanged();
-	}
-
-	// アイテム描画
+/*--------------------------------------------------------------------------------------------------
+	メソッド
+--------------------------------------------------------------------------------------------------*/
+	// セル描画
 	@Override
 	public View getView(int position, View convertView, final ViewGroup parent) {
-		View view;
+		ViewHolder holder;
 
 		if (convertView == null) {
-			view = mInflater.inflate(mResourceId, null);
+			// セルにリソースを展開
+			convertView = mInflater.inflate(mResourceId, null);
+
+			// ビューホルダーに各ビューを保存
+			holder = new ViewHolder();
+			holder.cocktailNameView = (TextView) convertView.findViewById(R.id.cocktailNameView);
+			holder.thumbnailImageView = (NetworkImageView) convertView.findViewById(R.id.cocktailImageView);
+			holder.recipeView = (TextView) convertView.findViewById(R.id.recipeView);
+			holder.favoriteButton = (ToggleButton) convertView.findViewById(R.id.favoriteButton);
+
+			// タグにビューホルダーのインスタンスを保存
+			convertView.setTag(holder);
+
 		} else {
-			view = convertView;
+			// タグからビューホルダーのインスタンスを取得
+			holder = (ViewHolder) convertView.getTag();
 		}
 
+		// 各ビューにカクテル情報を設定
 		Cocktail item = mCocktailList.get(position);
 
 		// カクテル名
-		TextView cocktailNameView = (TextView) view.findViewById(R.id.cocktailNameView);
-		cocktailNameView.setText(item.getName());
+		holder.cocktailNameView.setText(item.getName());
 
 		// サムネイル
 		String thumbnailUrl = item.getThumbnailUrl();
+		ImageLoader imageLoader = NetworkSingleton.getInstance(parent.getContext()).getImageLoader();
+		holder.thumbnailImageView.setDefaultImageResId(R.drawable.nothumbnail);
+		holder.thumbnailImageView.setErrorImageResId(R.drawable.nothumbnail);
 
 		if (thumbnailUrl.equals("")) {
-			// 画像未登録の場合はNoImageアイコンを表示
-			thumbnailUrl = getContext().getString(R.string.NoThumbnail_URL);
+			holder.thumbnailImageView.setImageUrl(null, imageLoader);
+		} else {
+			holder.thumbnailImageView.setImageUrl(thumbnailUrl, imageLoader);
 		}
-		// URLを絶対パスに整形
-		thumbnailUrl = getContext().getString(R.string.server_URL) +
-				getContext().getString(R.string.photo_URL) +
-				thumbnailUrl;
-
-		ImageLoader imageLoader = NetworkSingleton.getInstance(parent.getContext()).getImageLoader();
-		NetworkImageView imageView = (NetworkImageView) view.findViewById(R.id.cocktailImageView);
-		imageView.setImageUrl(thumbnailUrl, imageLoader);
 
 		// レシピ
-		TextView recipeView = (TextView) view.findViewById(R.id.recipeView);
-		recipeView.setText(item.getRecipeStringBuffer());
+		holder.recipeView.setText(item.getRecipeStringBuffer());
 
 		// お気に入り
-		ToggleButton favoriteButton = (ToggleButton) view.findViewById(R.id.favoriteButton);
+		// お気に入りテーブルを検索しトグルのチェックを設定
+		String cocktailId = item.getId();
 
-		// 持っているボタンの初期値を所持製品DBから取得
-		SQLiteDatabase database = mSQLiteHelper.getWritableDatabase();
-
-		// カクテルIDをキーにDBを検索
-		String cocktailID = item.getId();
-		String sql =
-				"SELECT CocktailID FROM favorite WHERE CocktailID=" +
-						"\"" + cocktailID + "\"";
-		Cursor cursor= database.rawQuery(sql, null);
-		// カクテルIDがDBに登録されていたらボタンの初期値をON
-		if (cursor.moveToFirst()) {
-			favoriteButton.setChecked(true);
+		if (mFavoriteDAO.ExistCocktailId(cocktailId)) {
+			holder.favoriteButton.setChecked(true);
 		} else {
-			favoriteButton.setChecked(false);
+			holder.favoriteButton.setChecked(false);
 		}
 
-		cursor.close();
-		database.close();
-
 		// お気に入りボタンにカクテルIDをタグ付け
-		favoriteButton.setTag(R.string.TAG_CocktailID_Key, cocktailID);
+		holder.favoriteButton.setTag(R.string.TAG_CocktailID_Key, cocktailId);
 
 		// お気に入りボタンタップ時のリスナーを登録
-		favoriteButton.setOnClickListener(new View.OnClickListener() {
+		holder.favoriteButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				ToggleButton btn = (ToggleButton) view;
 
-				SQLiteDatabase database = mSQLiteHelper.getWritableDatabase();
-
 				if (btn.isChecked()) {
-					// ボタンがONになった場合 所持製品DBに製品ID・素材IDを登録
-					ContentValues values = new ContentValues();
-					values.put("CocktailID", (String) btn.getTag(R.string.TAG_CocktailID_Key));
+					// ボタンがONになった場合はお気に入りテーブルにカクテルIDを追加
+					Favorite favorite = new Favorite();
+					favorite.setCocktailId((String) btn.getTag(R.string.TAG_CocktailID_Key));
 
-					database.insert("favorite", null, values);
+					mFavoriteDAO.insertFavorite(favorite);
 				} else {
-					// ボタンがOFFになった場合 所持製品DBから製品ID・素材IDを削除
-					database.delete("favorite", "CocktailID=?",
-							new String[]{(String) btn.getTag(R.string.TAG_CocktailID_Key)});
-				}
+					// ボタンがOFFになった場合はお気に入りテーブルからカクテルIDを削除
+					Favorite favorite = new Favorite();
+					favorite.setCocktailId((String) btn.getTag(R.string.TAG_CocktailID_Key));
 
-				database.close();
+					mFavoriteDAO.deleteFavorite(favorite);
+				}
 			}
 		});
 
-		return view;
+		return convertView;
 	}
 
 }

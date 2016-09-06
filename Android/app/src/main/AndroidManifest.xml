@@ -29,6 +29,8 @@
         <activity android:name=".CocktailListItemActivity"/>
         <activity android:name=".RecipeListItemActivity"/>
         <activity android:name=".ProductListItemActivity"/>
+        <activity android:name=".A0203_ProductActivity">
+        </activity>
     </application>
 
 </manifest>

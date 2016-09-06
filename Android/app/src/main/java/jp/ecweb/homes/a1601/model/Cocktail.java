@@ -1,4 +1,4 @@
-package jp.ecweb.homes.a1601.Cocktail;
+package jp.ecweb.homes.a1601.model;
 
 import android.text.SpannableStringBuilder;
 
@@ -17,10 +17,6 @@ import java.util.List;
  */
 public class Cocktail {
 
-	// ログ出力
-	private final String LOG_TAG = "A1601";
-	private final String LOG_CLASSNAME = this.getClass().getSimpleName() + " : ";
-
 	// メンバ変数
     private String id;					// カクテルID
     private String name;				// カクテル名
@@ -34,59 +30,7 @@ public class Cocktail {
     private List<Recipe> Recipes;
 	private SpannableStringBuilder RecipeStringBuffer;
 	private String HowTo;               // 作り方
-
-/*--------------------------------------------------------------------------------------------------
-	メンバ関数
---------------------------------------------------------------------------------------------------*/
-	// JSON形式のレスポンスからカクテルテーブルを生成
-	public static List<Cocktail> getJSONtoCocktailList(List<Cocktail> cocktails, JSONArray jsonArray) {
-
-		// テーブルをクリア
-		cocktails.clear();
-
-		for (int i = 0; i < jsonArray.length(); i++) {
-			Cocktail cocktail = new Cocktail();
-
-			try {
-				JSONObject jsonCocktailObject = jsonArray.getJSONObject(i);
-
-				// JSONデータから値を取り出してテーブルに設定
-				// カクテル情報部
-				cocktail.setId(jsonCocktailObject.getString("ID"));
-				cocktail.setName(jsonCocktailObject.getString("Name"));
-				cocktail.setThumbnailUrl(jsonCocktailObject.getString("ThumbnailURL"));
-
-				// レシピ情報部
-				cocktail.Recipes = new ArrayList<>();
-				JSONArray jsonRecipeArray = jsonCocktailObject.getJSONArray("Recipes");
-
-				for (int j = 0; j < jsonRecipeArray.length(); j++) {
-					Recipe recipe = new Recipe();
-
-					JSONObject jsonRecipeObject = jsonRecipeArray.getJSONObject(j);
-
-					recipe.setId(jsonRecipeObject.getString("ID"));
-					recipe.setCocktailID(jsonRecipeObject.getString("CocktailID"));
-					recipe.setMatelialID(jsonRecipeObject.getString("MatelialID"));
-					recipe.setCategory1(jsonRecipeObject.getString("Category1"));
-					recipe.setCategory2(jsonRecipeObject.getString("Category2"));
-					recipe.setCategory3(jsonRecipeObject.getString("Category3"));
-					recipe.setMatelialName(jsonRecipeObject.getString("Name"));
-					recipe.setQuantity(jsonRecipeObject.getInt("Quantity"));
-					recipe.setUnit(jsonRecipeObject.getString("Unit"));
-
-					cocktail.Recipes.add(recipe);
-				}
-
-				cocktails.add(cocktail);
-
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-		}
-
-		return cocktails;
-	}
+	private String Copylight;           // 著作権表記
 
 /*--------------------------------------------------------------------------------------------------
 	Getter / Setter
@@ -186,5 +130,13 @@ public class Cocktail {
 
 	public void setRecipeStringBuffer(SpannableStringBuilder recipeStringBuffer) {
 		RecipeStringBuffer = recipeStringBuffer;
+	}
+
+	public String getCopylight() {
+		return Copylight;
+	}
+
+	public void setCopylight(String copylight) {
+		Copylight = copylight;
 	}
 }

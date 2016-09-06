@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".A0203_ProductActivity">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/baseLayout">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Small Text"
+                android:id="@+id/itemNameView"
+                android:layout_weight="1"/>
+
+            <ToggleButton
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/PuductHavingButton"
+                android:focusable="false"
+                android:textOn="@string/Have_text"
+                android:textOff="@string/DoNotHave_text"
+                android:textSize="10sp"
+                android:paddingRight="10dp"
+                android:layout_gravity="center_vertical"/>
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:id="@+id/scrollView2"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:id="@+id/bodyLayout">
+
+                <com.android.volley.toolbox.NetworkImageView
+                    android:layout_width="180dp"
+                    android:layout_height="180dp"
+                    android:id="@+id/ProductImageView"
+                    android:scaleType="fitCenter"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/RakutenShop"
+                    android:id="@+id/RakutenShopButton"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@color/highlighted_text_material_dark"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:onClick="onRakutenShopButtonTapped"
+                    android:layout_marginTop="5dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="@string/itemCaption_text"
+                    android:id="@+id/itemCaptionLabel"
+                    android:background="@color/colorPrimary"
+                    android:textColor="@android:color/white"
+                    android:textAlignment="center"
+                    android:layout_marginTop="20dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Small Text"
+                    android:id="@+id/itemCaptionView"
+                    />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="@string/showName_text"
+                    android:id="@+id/shopNameLabel"
+                    android:background="@color/colorPrimary"
+                    android:textColor="@android:color/white"
+                    android:textAlignment="center"
+                    android:layout_marginTop="20dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Small Text"
+                    android:id="@+id/shopNameView"/>
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="20dp"
+                    />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Small Text"
+                    android:id="@+id/itemCodeView"
+                    android:gravity="right"/>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:id="@+id/adLayout">
+
+            <com.google.android.gms.ads.AdView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/adView"
+                ads:adSize="SMART_BANNER"
+                ads:adUnitId="@string/banner_ad_unit_id"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

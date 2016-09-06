@@ -36,6 +36,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+                <ToggleButton
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:text="New ToggleButton"
+                    android:id="@+id/favoriteButton"
+                    android:background="@drawable/custom_togglebutton"
+                    android:textOff=""
+                    android:textOn=""/>
+
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -45,15 +54,6 @@
                     android:paddingLeft="10dp"
                     android:textColor="@android:color/black"
                     android:layout_weight="8"/>
-
-                <ToggleButton
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:text="New ToggleButton"
-                    android:id="@+id/favoriteButton"
-                    android:background="@drawable/custom_togglebutton"
-                    android:textOff=""
-                    android:textOn=""/>
 
             </LinearLayout>
 

@@ -1,13 +1,9 @@
 package jp.ecweb.homes.a1601;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.text.SpannableStringBuilder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,29 +12,27 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import jp.ecweb.homes.a1601.Adapter.CocktailListAdapter;
-import jp.ecweb.homes.a1601.Cocktail.Cocktail;
-import jp.ecweb.homes.a1601.Database.MySQLiteOpenHelper;
 import jp.ecweb.homes.a1601.Network.NetworkSingleton;
-import jp.ecweb.homes.a1601.Network.ServerCommunication;
+import jp.ecweb.homes.a1601.callback.CocktailListCallbacks;
+import jp.ecweb.homes.a1601.dao.HavingProductDAO;
+import jp.ecweb.homes.a1601.listener.CocktailListListener;
+import jp.ecweb.homes.a1601.model.Cocktail;
+import jp.ecweb.homes.a1601.model.Category;
+import jp.ecweb.homes.a1601.model.HavingProduct;
 
-public class A0201_ProductToCocktailActivity extends AppCompatActivity {
+public class A0201_ProductToCocktailActivity extends AppCompatActivity implements CocktailListCallbacks {
 
 	// ログ出力
 	private final String LOG_TAG = "A1601";
@@ -46,9 +40,9 @@ public class A0201_ProductToCocktailActivity extends AppCompatActivity {
 
 	// メンバ変数
 	private CocktailListAdapter mListViewAdapter;					// アダプター格納用
+	private HavingProductDAO mHavingProductDAO;                     // SQLite 所持製品テーブル操作クラス
+
 	private List<Cocktail> mCocktailList = new ArrayList<>();		// リスト表示内容
-	private Map<String, SpannableStringBuilder> mRecipeList = new HashMap<>();
-																	// リスト表示内容(レシピ情報)
 
 /*--------------------------------------------------------------------------------------------------
 	Activityイベント処理
@@ -64,15 +58,17 @@ public class A0201_ProductToCocktailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_a0201__product_to_cocktail);
 
 	    // 広告を表示
-	    MobileAds.initialize(getApplicationContext(), "ca-app-pub-2276647365248742~3207890318");
+	    MobileAds.initialize(this, getString(R.string.banner_ad_app_id));
 	    AdView mAdView = (AdView) findViewById(R.id.adView);
 	    AdRequest adRequest = new AdRequest.Builder().build();
 	    mAdView.loadAd(adRequest);
 
-		// ListViewのアダプターを登録
+	    // メンバ変数の初期化
+	    mHavingProductDAO = new HavingProductDAO(this);
+
+	    // ListViewのアダプターを登録
 		mListViewAdapter = new CocktailListAdapter(this,
 				R.layout.activity_cocktail_list_item, mCocktailList);
-//	    mListViewAdapter = new CocktailListAdapter(A0201_ProductToCocktailActivity.this);
 		ListView listView = (ListView) findViewById(R.id.listView);
 		listView.setAdapter(mListViewAdapter);
 
@@ -109,42 +105,44 @@ public class A0201_ProductToCocktailActivity extends AppCompatActivity {
 		super.onStart();
 		Log.d(LOG_TAG, LOG_CLASSNAME + "onStart start");
 
-		final List<String> havingProduct = new ArrayList<>();
+		// 所持製品テーブルから所持している製品・材料のリストを取得
+		List<HavingProduct> productList = mHavingProductDAO.getProductList();
 
-		// 所持商品DB(Local SQLite)から所持している材料IDのリストを取得
-		MySQLiteOpenHelper mySQLHelper = new MySQLiteOpenHelper(this);
-		SQLiteDatabase database = mySQLHelper.getWritableDatabase();
+		// カクテル一覧の取得
+		// WEB API Url
+		String url = getString(R.string.server_URL) + "getProductToCocktailList.php";
 
+		// POSTリクエスト用に材料IDを連結
 		StringBuilder stringBuilder = new StringBuilder();
-		String sql = "SELECT DISTINCT MaterialID FROM HavingProduct";
-		Cursor cursor = database.rawQuery(sql, null);
-
-		if (cursor.moveToFirst()) {
-			for (int i = 0; i < cursor.getCount(); i++) {
-				// リクエスト用に材料IDを連結
-				String value = cursor.getString(cursor.getColumnIndex("MaterialID"));
-				if (i > 0) {
-					stringBuilder.append(",");
-				}
-				stringBuilder.append(value);
-
-				// ビュー表示用にリストを作成
-				havingProduct.add(value);
-
-				cursor.moveToNext();
+		for (int i = 0; i < productList.size(); i++) {
+			if (i > 0) {
+				stringBuilder.append(",");
 			}
+			stringBuilder.append(productList.get(i).getMaterialID());
 		}
 
-		cursor.close();
-		database.close();
+		// POSTデータ作成
+		JSONObject postData = new JSONObject();
+		try {
+			postData.put("id", stringBuilder.toString());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		Log.d(LOG_TAG, "PostRequest=" + postData.toString());
 
-		Log.d(LOG_TAG, LOG_CLASSNAME + "SQLite検索結果=" +
-				stringBuilder.toString());
+		// Volleyリクエストの作成
+		CocktailListListener cocktailListListener = new CocktailListListener(this);
 
-		// リスト生成
-		ServerCommunication serverCommunication = new ServerCommunication();
-		serverCommunication.getProductToCocktailList(this, mListViewAdapter,
-				mCocktailList, havingProduct);
+		JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+				Request.Method.POST,
+				url,
+				postData,
+				cocktailListListener,
+				cocktailListListener
+		);
+
+		// リクエストの送信
+		NetworkSingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
 
 		Log.d(LOG_TAG, LOG_CLASSNAME + "onStart end");
 	}
@@ -216,4 +214,27 @@ public class A0201_ProductToCocktailActivity extends AppCompatActivity {
 
 		return true;
 	}
+
+
+/*--------------------------------------------------------------------------------------------------
+	非同期コールバック処理
+--------------------------------------------------------------------------------------------------*/
+	// カテゴリ一覧取得処理のコールバック処理
+	@Override
+	public void CategoryCallback(Category category) { }
+
+	// カクテル一覧取得処理のコールバック処理
+	@Override
+	public void ListResponseCallback(List<Cocktail> cocktailList) {
+		Log.d(LOG_TAG, LOG_CLASSNAME + "ListResponseCallback start");
+
+		// ListView表示用カクテル一覧を更新
+		mCocktailList.clear();
+		mCocktailList.addAll(cocktailList);
+
+		// ListViewに更新を通知
+		mListViewAdapter.notifyDataSetChanged();
+	}
+
+
 }

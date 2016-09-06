@@ -13,7 +13,7 @@
     <string name="recipe_text">レシピ</string>
     <string name="detail_text">詳細</string>
     <string name="photo_URL">img/</string>
-    <string name="server_URL">http://www.homes.ecweb.jp/A1601/</string>
+    <string name="server_URL">http://ik1-325-22637.vs.sakura.ne.jp/A1601/</string>
     <string name="Have_text">ある</string>
     <string name="DoNotHave_text">ない</string>
     <string name="NoImage_URL">noimage.jpg</string>
@@ -24,7 +24,8 @@
     <string name="ERR_VolleyMessage_text">サーバーとの通信に失敗しました。\n通信状態を確認してください。</string>
     <string name="logo_text">Logo</string>
     <string name="banner_ad_unit_id">ca-app-pub-2276647365248742/4684623515</string>
-    <string name="version_text">version : 1.0</string>
+    <string name="banner_ad_app_id">ca-app-pub-2276647365248742~3207890318</string>
+    <string name="version_text">version : </string>
     <string name="product_text">材料</string>
     <string name="Methods_text">製法</string>
     <string name="Grass_text">グラス</string>
@@ -35,4 +36,11 @@
     <string name="All_text">全て</string>
     <string name="TAG_CocktailID_Key">3</string>
     <string name="favorite_text">お気に入り</string>
+    <string name="Photo_text">写真</string>
+    <string name="Maker_text">製造/販売会社</string>
+    <string name="Category_text">カテゴリ</string>
+    <string name="Hold_text">持っている</string>
+    <string name="itemCaption_text">商品説明</string>
+    <string name="showName_text">店舗名</string>
+    <string name="RakutenShop">この商品を楽天で購入する</string>
 </resources>

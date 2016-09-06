@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import jp.ecweb.homes.a1601.Cocktail.Recipe;
+import jp.ecweb.homes.a1601.model.Recipe;
 import jp.ecweb.homes.a1601.R;
 
 /**

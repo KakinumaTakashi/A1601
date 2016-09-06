@@ -1,13 +1,10 @@
-package jp.ecweb.homes.a1601.Cocktail;
-
-import io.realm.annotations.PrimaryKey;
+package jp.ecweb.homes.a1601.model;
 
 /**
  * Created by Takashi Kakinuma on 2016/07/14.
  */
 public class Product {
 
-    @PrimaryKey
     private String id;                  // 商品ID
     private String materialID;        // 素材ID
     private String category1;			// 大分類
@@ -17,11 +14,9 @@ public class Product {
     private String name;              // 商品名
     private String maker;             // メーカー名
     private String brand;             // ブランド名
-    private long capacity;           // 容量(ml)
-    private String unit;				// 単位
     private float alcoholDegree;    // アルコール度数(%)
     private String thumbnailURL;     // サムネイルURL
-    private String photoURL;          // 写真URL
+    private String itemCode;            // 楽天商品コード
 
     public String getId() {
         return id;
@@ -95,22 +90,6 @@ public class Product {
         this.brand = brand;
     }
 
-    public long getCapacity() {
-        return capacity;
-    }
-
-    public void setCapacity(long capacity) {
-        this.capacity = capacity;
-    }
-
-    public String getUnit() {
-        return unit;
-    }
-
-    public void setUnit(String unit) {
-        this.unit = unit;
-    }
-
     public float getAlcoholDegree() {
         return alcoholDegree;
     }
@@ -127,11 +106,11 @@ public class Product {
         this.thumbnailURL = thumbnailURL;
     }
 
-    public String getPhotoURL() {
-        return photoURL;
-    }
+	public String getItemCode() {
+		return itemCode;
+	}
 
-    public void setPhotoURL(String photoURL) {
-        this.photoURL = photoURL;
-    }
+	public void setItemCode(String itemCode) {
+		this.itemCode = itemCode;
+	}
 }
